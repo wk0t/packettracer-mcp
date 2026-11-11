@@ -1,0 +1,6861 @@
+{
+  "engine": "pktctl 0.2.2",
+  "connector": "1.0.0",
+  "tools": [
+    {
+      "name": "activity_instructions",
+      "title": null,
+      "description": "Read a page of the open activity's instructions, as text and as HTML.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "page": {
+            "default": null,
+            "description": "Page number starting at 1. Defaults to 1.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "html": {
+            "description": "The page as Packet Tracer stores it, with embedded images replaced by\n`data:,image-removed` so they do not flood the reply.",
+            "type": "string"
+          },
+          "page": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "pages": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "text": {
+            "description": "The page as readable text.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "page",
+          "pages",
+          "text",
+          "html"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "activity_status",
+      "title": null,
+      "description": "Progress of the open activity (.pka): percentage complete, score, assessment items and points, instruction pages, time elapsed or left. For a plain network it only says it is not an activity.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Tally": {
+            "properties": {
+              "correct": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "total": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "correct",
+              "total"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "instruction_pages": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "is_activity": {
+            "type": "boolean"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Tally"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Assessment items (the Check Results tree)."
+          },
+          "password_confirmed": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "percent_complete": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "points": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Tally"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Assessment points."
+          },
+          "score_percent": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "seconds_elapsed": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "seconds_left": {
+            "description": "Seconds left when the activity has a countdown timer.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "file",
+          "is_activity"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_device",
+      "title": null,
+      "description": "Add a device to the logical workspace by model name (see list_models), optionally naming it and placing it at x/y. Routers and switches boot immediately. Returns the device as Packet Tracer now shows it.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "model": {
+            "description": "Model name as listed by `list_models`, for example `2911`, `2960-24TT`, `PC-PT`.",
+            "type": "string"
+          },
+          "name": {
+            "default": null,
+            "description": "Name to give the device. Packet Tracer picks one (Router0, PC1, ...) when omitted.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "x": {
+            "default": null,
+            "description": "Canvas x of the device center. Give both x and y, or neither to use the next free grid slot.",
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "y": {
+            "default": null,
+            "description": "Canvas y of the device center.",
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "model"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "x": {
+            "format": "double",
+            "type": "number"
+          },
+          "y": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "model",
+          "kind",
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_location",
+      "title": null,
+      "description": "Create a place in the physical workspace: a `city`, a `building`, a `wiring_closet`, or furniture to arrange devices on (`rack`, `table`, `shelf`, `cable_pegboard`, `container`), with an optional name and position. Cities and closets use Packet Tracer's own buttons; the rest are written into the network file and come back with the temporary copy Packet Tracer now has open, so save with save_network to keep them.",
+      "inputSchema": {
+        "$defs": {
+          "NewLocation": {
+            "oneOf": [
+              {
+                "const": "city",
+                "description": "A city in Intercity.",
+                "type": "string"
+              },
+              {
+                "const": "wiring_closet",
+                "description": "A wiring closet in Intercity, a city or a building.",
+                "type": "string"
+              },
+              {
+                "const": "building",
+                "description": "A building in a city.",
+                "type": "string"
+              },
+              {
+                "const": "rack",
+                "description": "A rack, for devices mounted in a wiring closet.",
+                "type": "string"
+              },
+              {
+                "const": "table",
+                "description": "A table to lay devices on.",
+                "type": "string"
+              },
+              {
+                "const": "shelf",
+                "description": "A shelf.",
+                "type": "string"
+              },
+              {
+                "const": "cable_pegboard",
+                "description": "A cable pegboard.",
+                "type": "string"
+              },
+              {
+                "const": "container",
+                "description": "A generic container, for anything else.",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "inside": {
+            "default": null,
+            "description": "Path of the city or building to put a wiring closet in, for example\n`Home City/Corporate Office`. Omit for Intercity. Cities always go in Intercity.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "$ref": "#/$defs/NewLocation",
+            "description": "What to create: `city`, `wiring_closet`, `building`, `rack`, `table`, `shelf`,\n`cable_pegboard` or `container`. Packet Tracer's own API only creates cities and\nwiring closets; the rest are written into the network file."
+          },
+          "name": {
+            "default": null,
+            "description": "Name for the new location. Packet Tracer's default name is used when omitted.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "x_percent": {
+            "default": null,
+            "description": "Where to put it inside its parent, as a percentage of the room's width and height.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "y_percent": {
+            "default": null,
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Location": {
+            "properties": {
+              "devices": {
+                "description": "Devices placed directly inside, by their device name.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "kind": {
+                "description": "`city`, `building`, `wiring_closet`, `rack`, `shelf`, `generic_container`, ...",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "description": "Path from Intercity, for example `Home City/Corporate Office`. Empty for Intercity itself.",
+                "type": "string"
+              },
+              "x": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "y": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "path",
+              "name",
+              "kind",
+              "x",
+              "y",
+              "devices"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "file": {
+            "description": "The temporary copy Packet Tracer now has open, when the change went through the\nnetwork file. Your own file is untouched: save with `save_network` and a path to\nkeep the change there.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "$ref": "#/$defs/Location"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_module",
+      "title": null,
+      "description": "Install a module (for example HWIC-2T for serial ports) in an empty slot. The device is powered off, the module inserted and the device powered back on, exactly like real hardware, so unsaved configuration is lost. Returns the ports the module added.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "Router or switch name.",
+            "type": "string"
+          },
+          "module": {
+            "description": "Module model supported by the device, for example `HWIC-2T` or `NIM-2T`.",
+            "type": "string"
+          },
+          "slot": {
+            "description": "Empty slot path from `list_slots`, for example `0/1`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "slot",
+          "module"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Endpoint": {
+            "properties": {
+              "device": {
+                "type": "string"
+              },
+              "port": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "device",
+              "port"
+            ],
+            "type": "object"
+          },
+          "Link": {
+            "properties": {
+              "a": {
+                "$ref": "#/$defs/Endpoint"
+              },
+              "b": {
+                "$ref": "#/$defs/Endpoint"
+              },
+              "cable": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "a",
+              "b",
+              "cable"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "cut_links": {
+            "items": {
+              "$ref": "#/$defs/Link"
+            },
+            "type": "array"
+          },
+          "device": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "ports_added": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ports_removed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "slot": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "slot",
+          "module",
+          "ports_added",
+          "ports_removed"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_note",
+      "title": null,
+      "description": "Write a text note on the logical canvas, for example to label a subnet or a VLAN. Returns the note with its id.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "text": {
+            "description": "Text to show, for example `LAN 192.168.10.0/24 (VLAN 10)`.",
+            "type": "string"
+          },
+          "x": {
+            "description": "Canvas x coordinate of the note.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "y": {
+            "description": "Canvas y coordinate of the note.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "text"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "x": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "y": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "text",
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_pdu",
+      "title": null,
+      "description": "Send a simple PDU (ICMP echo) from one device to another, like the Add Simple PDU button. In Realtime mode it goes at once; in Simulation mode it waits for simulation_step.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "destination": {
+            "description": "Device it is sent to.",
+            "type": "string"
+          },
+          "source": {
+            "description": "Device the ping starts from, for example `PC1`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "destination"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "destination": {
+            "type": "string"
+          },
+          "mode": {
+            "description": "`realtime`: sent at once. `simulation`: waits for `simulation_step`.",
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "destination",
+          "mode"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "add_server_user",
+      "title": null,
+      "description": "Add an FTP account (with permissions such as RWDNL) or an email account to a server.",
+      "inputSchema": {
+        "$defs": {
+          "UserService": {
+            "enum": [
+              "ftp",
+              "email"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "domain": {
+            "default": null,
+            "description": "Email: the server's mail domain, for example `gamc.bo`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "password": {
+            "type": "string"
+          },
+          "permissions": {
+            "default": null,
+            "description": "FTP permissions: any of R(ead) W(rite) D(elete) N (rename) L(ist). Defaults to `RWDNL`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "service": {
+            "$ref": "#/$defs/UserService"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "service",
+          "username",
+          "password"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "UserService": {
+            "enum": [
+              "ftp",
+              "email"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "service": {
+            "$ref": "#/$defs/UserService"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "service",
+          "username"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "arrange_devices",
+      "title": null,
+      "description": "Lay devices out inside a room, building, rack or table of the physical workspace, moving in the ones that are somewhere else. Positions are percentages of the room, which is how Packet Tracer draws them: leave them out for an even grid, set `columns` and `margin_percent` to shape it, or give exact `spots` like [[20, 30], [60, 30]].",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "columns": {
+            "default": null,
+            "description": "How many per row. Defaults to the squarish grid that fits them.",
+            "format": "uint32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "devices": {
+            "default": [],
+            "description": "Devices to place, in order. Omit to arrange everything already in that location.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "location": {
+            "description": "Path of the room, building, rack or table to tidy up, as listed by `list_locations`.",
+            "type": "string"
+          },
+          "margin_percent": {
+            "default": null,
+            "description": "Free space left around the grid, as a percentage of the room. Defaults to 12.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "spots": {
+            "default": [],
+            "description": "Exact spots instead of a grid, as percentages of the room: `[[20, 30], [60, 30]]`,\none per device.",
+            "items": {
+              "items": {
+                "format": "double",
+                "type": "number"
+              },
+              "maxItems": 2,
+              "minItems": 2,
+              "type": "array"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Placed": {
+            "properties": {
+              "device": {
+                "type": "string"
+              },
+              "x_percent": {
+                "description": "Where it sits, as a percentage of the room's width and height.",
+                "format": "double",
+                "type": "number"
+              },
+              "y_percent": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "required": [
+              "device",
+              "x_percent",
+              "y_percent"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "devices": {
+            "items": {
+              "$ref": "#/$defs/Placed"
+            },
+            "type": "array"
+          },
+          "file": {
+            "description": "The temporary copy Packet Tracer has open when the moves went through the network\nfile, which is what furniture needs; save with `save_network` to keep it.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "location",
+          "devices"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "browse_web",
+      "title": null,
+      "description": "Open a URL in the Web Browser of a PC, laptop or server, like typing it and pressing Go, and return the page Packet Tracer served: its status (ok, timeout, host_not_found, ...), the server's address, the HTML and the text. Names are resolved through the host's DNS server.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "PC, laptop or server whose Web Browser opens the page.",
+            "type": "string"
+          },
+          "timeout_secs": {
+            "default": null,
+            "description": "Seconds to wait for the page. Defaults to 30, maximum 300.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "url": {
+            "description": "Address as typed in the browser, for example `http://www.gamc.bo` or\n`https://192.168.10.10/index.html`. `http://` is added when missing.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "url"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "html": {
+            "type": "string"
+          },
+          "server": {
+            "description": "The address the name resolved to, when it did.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "`ok`, `not_found`, `timeout`, `host_not_found`, `dns_server_not_found`, ...",
+            "type": "string"
+          },
+          "text": {
+            "description": "The page as readable text.",
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "url",
+          "status",
+          "html",
+          "text"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "call_ipc",
+      "title": null,
+      "description": "Call any Packet Tracer IPC method: start at a root or an object uuid and chain `steps`, like `network` -> getDevice(\"R1\") -> getPower(). Every step is checked against the official API before anything is sent, with exact argument types; objects come back as a class and uuid you can start the next call from. Prefer the dedicated tools when one fits; this reaches everything else, including changes, so read describe_ipc first.",
+      "inputSchema": {
+        "$defs": {
+          "IpcStep": {
+            "properties": {
+              "args": {
+                "default": [],
+                "description": "Arguments in order. Strings, numbers and booleans as JSON; IP, MAC and uuid values as\nstrings; enums by name (`ETHERNET_STRAIGHT`) or number; byte lists as arrays.",
+                "items": true,
+                "type": "array"
+              },
+              "method": {
+                "description": "Method name as listed by `describe_ipc`, for example `getDevice`.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "method"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "from": {
+            "description": "Where the call starts: a root (`network`, `appWindow`, `simulation`, `options`,\n`hardwareFactory`, `ipcManager`, `multiUserManager`, `userAppManager`, `commandLog`,\n`systemFileManager`) or the uuid of an object returned by an earlier call.",
+            "type": "string"
+          },
+          "steps": {
+            "description": "Methods to call one after another, each on the object the previous one returned.",
+            "items": {
+              "$ref": "#/$defs/IpcStep"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "from"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "call": {
+            "description": "The call as resolved, for example `network.getDevice(\"R1\").getPower()`.",
+            "type": "string"
+          },
+          "returns": {
+            "description": "Declared return type of the last method.",
+            "type": "string"
+          },
+          "value": {
+            "description": "The value. Objects come back as `{ \"class\", \"uuid\" }`, enums as `{ \"name\", \"value\" }`."
+          }
+        },
+        "required": [
+          "call",
+          "returns",
+          "value"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "check_activity",
+      "title": null,
+      "description": "Run the open activity's connectivity tests and return them with the current completion and score, like Check Results.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "ActivityStatus": {
+            "properties": {
+              "file": {
+                "type": "string"
+              },
+              "instruction_pages": {
+                "format": "int64",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "is_activity": {
+                "type": "boolean"
+              },
+              "items": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Tally"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Assessment items (the Check Results tree)."
+              },
+              "password_confirmed": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              },
+              "percent_complete": {
+                "format": "double",
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "points": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Tally"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "Assessment points."
+              },
+              "score_percent": {
+                "format": "double",
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "seconds_elapsed": {
+                "format": "int64",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "seconds_left": {
+                "description": "Seconds left when the activity has a countdown timer.",
+                "format": "int64",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "file",
+              "is_activity"
+            ],
+            "type": "object"
+          },
+          "Tally": {
+            "properties": {
+              "correct": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "total": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "correct",
+              "total"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "connectivity": {
+            "$ref": "#/$defs/Tally"
+          },
+          "connectivity_results": {
+            "description": "One line per connectivity test, as Packet Tracer reports it.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "$ref": "#/$defs/ActivityStatus"
+          }
+        },
+        "required": [
+          "status",
+          "connectivity",
+          "connectivity_results"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "configure_access_point",
+      "title": null,
+      "description": "Set the SSID, security (open, wep, wpa_psk, wpa2_psk), key and SSID broadcast of an access point or wireless router. Clients keep their current association until connect_wireless reconnects them.",
+      "inputSchema": {
+        "$defs": {
+          "Security": {
+            "enum": [
+              "open",
+              "wep",
+              "wpa_psk",
+              "wpa2_psk"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "broadcast_ssid": {
+            "default": null,
+            "description": "Advertise the SSID. Defaults to true.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "device": {
+            "description": "Access point or wireless router name.",
+            "type": "string"
+          },
+          "key": {
+            "default": null,
+            "description": "Passphrase for WPA (8-63 characters) or WEP key (10 or 26 hex digits).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "security": {
+            "$ref": "#/$defs/Security",
+            "default": "open"
+          },
+          "ssid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "ssid"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Security": {
+            "enum": [
+              "open",
+              "wep",
+              "wpa_psk",
+              "wpa2_psk"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "broadcast_ssid": {
+            "type": "boolean"
+          },
+          "device": {
+            "type": "string"
+          },
+          "security": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Security"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ssid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "ssid",
+          "broadcast_ssid"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "configure_dhcp_server",
+      "title": null,
+      "description": "Configure the DHCP service of a server: switch it on and create or update pools (gateway, DNS, start address, mask, maximum users). Existing pools with the same name are updated.",
+      "inputSchema": {
+        "$defs": {
+          "PoolRequest": {
+            "properties": {
+              "dns": {
+                "default": null,
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "gateway": {
+                "description": "Default gateway handed to clients.",
+                "type": "string"
+              },
+              "mask": {
+                "type": "string"
+              },
+              "max_users": {
+                "default": null,
+                "description": "How many addresses to lease. Defaults to 256.",
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "name": {
+                "description": "Pool name, for example `VLAN10`. The server's default pool is `serverPool`.",
+                "type": "string"
+              },
+              "start_ip": {
+                "description": "First address to lease.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "gateway",
+              "start_ip",
+              "mask"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "enabled": {
+            "default": null,
+            "description": "Switch the service on or off. Defaults to on.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "pools": {
+            "items": {
+              "$ref": "#/$defs/PoolRequest"
+            },
+            "type": "array"
+          },
+          "port": {
+            "default": null,
+            "description": "Port the DHCP service runs on. Defaults to `FastEthernet0`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "DhcpPool": {
+            "properties": {
+              "dns": {
+                "type": "string"
+              },
+              "end_ip": {
+                "type": "string"
+              },
+              "gateway": {
+                "type": "string"
+              },
+              "mask": {
+                "type": "string"
+              },
+              "max_users": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "name": {
+                "type": "string"
+              },
+              "network": {
+                "type": "string"
+              },
+              "start_ip": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "network",
+              "mask",
+              "gateway",
+              "dns",
+              "start_ip",
+              "end_ip",
+              "max_users"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "pools": {
+            "items": {
+              "$ref": "#/$defs/DhcpPool"
+            },
+            "type": "array"
+          },
+          "port": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "port",
+          "enabled",
+          "pools"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "configure_dns_server",
+      "title": null,
+      "description": "Switch a server's DNS service on and add A, CNAME or NS records.",
+      "inputSchema": {
+        "$defs": {
+          "DnsRecord": {
+            "properties": {
+              "name": {
+                "description": "Domain name, for example `www.gamc.bo`.",
+                "type": "string"
+              },
+              "type": {
+                "$ref": "#/$defs/RecordType"
+              },
+              "value": {
+                "description": "IPv4 address for A, host name for CNAME, server name for NS.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type",
+              "value"
+            ],
+            "type": "object"
+          },
+          "RecordType": {
+            "enum": [
+              "A",
+              "CNAME",
+              "NS"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "enabled": {
+            "default": null,
+            "description": "Switch the service on or off. Defaults to on.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "records": {
+            "default": [],
+            "items": {
+              "$ref": "#/$defs/DnsRecord"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "DnsEntry": {
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "name",
+              "type",
+              "value"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "records": {
+            "items": {
+              "$ref": "#/$defs/DnsEntry"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "device",
+          "enabled",
+          "records"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "configure_email",
+      "title": null,
+      "description": "Set up the Email app of a PC, laptop or server: display name, address, user name, password and the incoming (POP3) and outgoing (SMTP) servers. Returns the account as Packet Tracer now has it.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "PC, laptop or server whose Email app to set up.",
+            "type": "string"
+          },
+          "email": {
+            "description": "Email Address, for example `ana@gamc.bo`.",
+            "type": "string"
+          },
+          "incoming_server": {
+            "description": "Incoming Mail Server (POP3): address or name.",
+            "type": "string"
+          },
+          "name": {
+            "description": "Your Name, for example `Ana`.",
+            "type": "string"
+          },
+          "outgoing_server": {
+            "description": "Outgoing Mail Server (SMTP): address or name.",
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "username": {
+            "description": "User Name on the mail server, usually the part before `@`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "name",
+          "email",
+          "username",
+          "password",
+          "incoming_server",
+          "outgoing_server"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "incoming_server": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "outgoing_server": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "name",
+          "email",
+          "username",
+          "incoming_server",
+          "outgoing_server"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "configure_host",
+      "title": null,
+      "description": "Set the IPv4 configuration of a PC, laptop or server: either DHCP, or a static ip and mask with optional gateway and DNS. Catches classic mistakes (invalid mask, host address equal to the network or broadcast, gateway outside the subnet) before touching Packet Tracer.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "PC, laptop or server name.",
+            "type": "string"
+          },
+          "dhcp": {
+            "default": false,
+            "description": "Get the address from a DHCP server instead of setting it statically.",
+            "type": "boolean"
+          },
+          "dns": {
+            "default": null,
+            "description": "DNS server address.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gateway": {
+            "default": null,
+            "description": "Default gateway; must be inside the host's subnet.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ip": {
+            "default": null,
+            "description": "Static IPv4 address, for example `192.168.10.10`. Required unless `dhcp` is true.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mask": {
+            "default": null,
+            "description": "Subnet mask, for example `255.255.255.0`. Required unless `dhcp` is true.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "port": {
+            "default": null,
+            "description": "Network port to configure. Defaults to `FastEthernet0`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "dhcp": {
+            "type": "boolean"
+          },
+          "dns": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gateway": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ip": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mask": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "port": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "port",
+          "dhcp"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "configure_host_ipv6",
+      "title": null,
+      "description": "Set the IPv6 configuration of a PC, laptop or server, like the IPv6 part of IP Configuration: `static` with an address such as 2001:db8:10::20/64, `auto` for SLAAC, or `off`; optional gateway (usually the router's link-local fe80::1) and DNS. Returns the addresses Packet Tracer now has on the port.",
+      "inputSchema": {
+        "$defs": {
+          "Ipv6Mode": {
+            "oneOf": [
+              {
+                "const": "static",
+                "description": "A fixed address with `address`, like the Static button of IP Configuration.",
+                "type": "string"
+              },
+              {
+                "const": "auto",
+                "description": "Stateless autoconfiguration (SLAAC) from the router's advertisements.",
+                "type": "string"
+              },
+              {
+                "const": "off",
+                "description": "IPv6 switched off on the port.",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "address": {
+            "default": null,
+            "description": "Static address with its prefix length, for example `2001:db8:10::20/64`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "device": {
+            "description": "PC, laptop or server name.",
+            "type": "string"
+          },
+          "dns": {
+            "default": null,
+            "description": "IPv6 DNS server.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gateway": {
+            "default": null,
+            "description": "Default gateway, usually the router's link-local address such as `fe80::1`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mode": {
+            "$ref": "#/$defs/Ipv6Mode",
+            "default": "static",
+            "description": "`static` (default), `auto` for SLAAC, or `off`."
+          },
+          "port": {
+            "default": null,
+            "description": "Network port to configure. Defaults to `FastEthernet0`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Ipv6Mode": {
+            "oneOf": [
+              {
+                "const": "static",
+                "description": "A fixed address with `address`, like the Static button of IP Configuration.",
+                "type": "string"
+              },
+              {
+                "const": "auto",
+                "description": "Stateless autoconfiguration (SLAAC) from the router's advertisements.",
+                "type": "string"
+              },
+              {
+                "const": "off",
+                "description": "IPv6 switched off on the port.",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "addresses": {
+            "description": "Addresses on the port as `address/prefix`, read back from Packet Tracer.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "device": {
+            "type": "string"
+          },
+          "dns": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gateway": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mode": {
+            "$ref": "#/$defs/Ipv6Mode"
+          },
+          "port": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "port",
+          "mode",
+          "addresses"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "configure_ios",
+      "title": null,
+      "description": "Apply a block of IOS configuration commands to a router or switch, as if typed after `configure terminal`: the first command enters global configuration and the rest follow the prompt, so `interface ...` sub-modes work. Stops at the first command IOS rejects, always leaves configuration mode, and runs `write memory` when `save` is true.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "commands": {
+            "description": "Configuration commands in order, for example `hostname R1`, `interface GigabitEthernet0/0`,\n`ip address 10.0.0.1 255.255.255.0`, `no shutdown`. A leading `enable` or\n`configure terminal` and a trailing `end` are handled for you.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "device": {
+            "description": "Router or switch name.",
+            "type": "string"
+          },
+          "save": {
+            "default": false,
+            "description": "Run `write memory` afterwards so the configuration survives a reload.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "device",
+          "commands"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "CommandOutcome": {
+            "properties": {
+              "command": {
+                "type": "string"
+              },
+              "output": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/$defs/CommandStatus"
+              }
+            },
+            "required": [
+              "command",
+              "status"
+            ],
+            "type": "object"
+          },
+          "CommandStatus": {
+            "enum": [
+              "ok",
+              "ambiguous",
+              "invalid",
+              "incomplete",
+              "not_implemented"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "applied": {
+            "format": "uint",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "device": {
+            "type": "string"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/$defs/CommandOutcome"
+            },
+            "type": "array"
+          },
+          "saved": {
+            "type": "boolean"
+          },
+          "total": {
+            "format": "uint",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "device",
+          "completed",
+          "applied",
+          "total",
+          "saved",
+          "results"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "connect",
+      "title": null,
+      "description": "Cable two ports together. Both ports must exist and be free. With the default `auto` cable pktctl picks serial, straight or cross the way the CCNA rules do; pass `cable` to force fiber, rollover, console, etc.",
+      "inputSchema": {
+        "$defs": {
+          "Cable": {
+            "enum": [
+              "auto",
+              "straight",
+              "cross",
+              "rollover",
+              "fiber",
+              "fiber_multimode",
+              "serial",
+              "console",
+              "phone",
+              "coaxial",
+              "octal",
+              "usb"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "cable": {
+            "$ref": "#/$defs/Cable",
+            "description": "Cable to use. `auto` picks serial for serial ports, straight between a host or router\nand a switch, and cross between devices of the same layer."
+          },
+          "device_a": {
+            "description": "First device name.",
+            "type": "string"
+          },
+          "device_b": {
+            "description": "Second device name.",
+            "type": "string"
+          },
+          "port_a": {
+            "description": "Port on the first device, exactly as `list_ports` shows it, for example `GigabitEthernet0/0`.",
+            "type": "string"
+          },
+          "port_b": {
+            "description": "Port on the second device.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device_a",
+          "port_a",
+          "device_b",
+          "port_b"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Endpoint": {
+            "properties": {
+              "device": {
+                "type": "string"
+              },
+              "port": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "device",
+              "port"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "a": {
+            "$ref": "#/$defs/Endpoint"
+          },
+          "b": {
+            "$ref": "#/$defs/Endpoint"
+          },
+          "cable": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "a",
+          "b",
+          "cable"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "connect_wireless",
+      "title": null,
+      "description": "Connect a laptop, PC or other client with a wireless card to a network: SSID, security and key, plus DHCP or a static address. Packet Tracer only associates when a network is loaded, so pktctl takes the network as bytes, sets the client's current profile, opens the result as a temporary copy (your own file is not written) and reports whether it associated and with which access point.",
+      "inputSchema": {
+        "$defs": {
+          "Security": {
+            "enum": [
+              "open",
+              "wep",
+              "wpa_psk",
+              "wpa2_psk"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "bring_access_point": {
+            "default": false,
+            "description": "Move the access point with this SSID next to the client first when it is out of radio\nrange (Packet Tracer's radios reach about 120 units in the physical workspace).",
+            "type": "boolean"
+          },
+          "device": {
+            "description": "Client with a wireless card, for example a laptop.",
+            "type": "string"
+          },
+          "dns": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gateway": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ip": {
+            "default": null,
+            "description": "Static address. Omit for DHCP.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "key": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mask": {
+            "default": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "security": {
+            "$ref": "#/$defs/Security",
+            "default": "open"
+          },
+          "ssid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "ssid"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "access_point": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "associated": {
+            "type": "boolean"
+          },
+          "device": {
+            "type": "string"
+          },
+          "diagnosis": {
+            "description": "When the client did not associate: why, with the distance to each access point\nbroadcasting the SSID.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "file": {
+            "description": "The temporary copy Packet Tracer now has open. Your own file is untouched: save\nwith `save_network` and a path to keep the change there.",
+            "type": "string"
+          },
+          "ip": {
+            "description": "Address of the wireless port; with DHCP, the lease if one arrived.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "moved_access_point": {
+            "description": "The access point that `bring_access_point` moved next to the client.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ssid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "ssid",
+          "associated",
+          "file"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "describe_ipc",
+      "title": null,
+      "description": "Explore Packet Tracer's complete IPC API (every class, method, argument and enum of the official framework). Give `search` to find methods by keyword, `class` to list everything an object offers, `enum` to read accepted values, or nothing for the list of roots. Use it before call_ipc for anything the dedicated tools do not cover.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "class": {
+            "default": null,
+            "description": "Show one class with every method it offers, inherited ones included, for example `Router`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "enum": {
+            "default": null,
+            "description": "Show the values of one enum, for example `ConnectType`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "events": {
+            "default": null,
+            "description": "Show the events an object class raises, for example `LogicalWorkspace`, for\n`watch_events`. An empty string lists every class that raises events.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "limit": {
+            "default": null,
+            "description": "Maximum number of search results. Defaults to 40, maximum 200.",
+            "format": "uint",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "search": {
+            "default": null,
+            "description": "Search class names, method names and summaries, for example `ssid` or `simulation`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "ClassInfo": {
+            "properties": {
+              "ancestors": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "methods": {
+                "items": {
+                  "$ref": "#/$defs/MethodInfo"
+                },
+                "type": "array"
+              },
+              "name": {
+                "type": "string"
+              },
+              "subclasses": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "name",
+              "ancestors",
+              "subclasses",
+              "methods"
+            ],
+            "type": "object"
+          },
+          "EnumInfo": {
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "values": {
+                "items": {
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "format": "int64",
+                      "type": "integer"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "name",
+              "values"
+            ],
+            "type": "object"
+          },
+          "EventInfo": {
+            "properties": {
+              "class": {
+                "type": "string"
+              },
+              "events": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "class",
+              "events"
+            ],
+            "type": "object"
+          },
+          "MethodInfo": {
+            "properties": {
+              "class": {
+                "type": "string"
+              },
+              "doc": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "signature": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "class",
+              "signature"
+            ],
+            "type": "object"
+          },
+          "Overview": {
+            "properties": {
+              "classes": {
+                "format": "uint",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "enums": {
+                "format": "uint",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "hint": {
+                "type": "string"
+              },
+              "methods": {
+                "format": "uint",
+                "minimum": 0,
+                "type": "integer"
+              },
+              "roots": {
+                "items": {
+                  "maxItems": 2,
+                  "minItems": 2,
+                  "prefixItems": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ],
+                  "type": "array"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "roots",
+              "classes",
+              "methods",
+              "enums",
+              "hint"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "anyOf": [
+          {
+            "$ref": "#/$defs/ClassInfo"
+          },
+          {
+            "$ref": "#/$defs/EnumInfo"
+          },
+          {
+            "properties": {
+              "event_classes": {
+                "items": {
+                  "$ref": "#/$defs/EventInfo"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "event_classes"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "matches": {
+                "items": {
+                  "$ref": "#/$defs/MethodInfo"
+                },
+                "type": "array"
+              },
+              "truncated": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "matches",
+              "truncated"
+            ],
+            "type": "object"
+          },
+          {
+            "$ref": "#/$defs/Overview"
+          }
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "disconnect",
+      "title": null,
+      "description": "Remove the cable plugged into a port.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "Device name.",
+            "type": "string"
+          },
+          "port": {
+            "description": "Port name, exactly as `list_ports` shows it.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "port"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Endpoint": {
+            "properties": {
+              "device": {
+                "type": "string"
+              },
+              "port": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "device",
+              "port"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "port": {
+            "type": "string"
+          },
+          "was_connected_to": {
+            "$ref": "#/$defs/Endpoint"
+          }
+        },
+        "required": [
+          "device",
+          "port",
+          "was_connected_to"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "draw",
+      "title": null,
+      "description": "Draw on the logical canvas: a `circle` (centre and radius) around a subnet or group, a `rectangle` (two corners) to frame an area, or a `line` to mark a boundary. `color` is the outline (`red`, `blue`, `green`, ... or `#rrggbb`); `fill` fills circles and rectangles. The drawing is written into the network file, which Packet Tracer reopens from a temporary copy; save with a path to keep it. Returns the id `remove_drawing` takes.",
+      "inputSchema": {
+        "$defs": {
+          "Drawing": {
+            "oneOf": [
+              {
+                "const": "circle",
+                "description": "A circle, to ring a subnet or a group of devices.",
+                "type": "string"
+              },
+              {
+                "const": "rectangle",
+                "description": "A rectangle, to frame an area such as a building, a floor or a site.",
+                "type": "string"
+              },
+              {
+                "const": "line",
+                "description": "A straight line, to mark a boundary or point at something.",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "color": {
+            "default": null,
+            "description": "Outline colour: `red`, `orange`, `yellow`, `green`, `blue`, `purple`, `gray`,\n`black`, `white`, or a `#rrggbb` value. Defaults to blue.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fill": {
+            "default": null,
+            "description": "Circle and rectangle: fill them with this colour, named or `#rrggbb`. Left\nunfilled when omitted.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "radius": {
+            "default": null,
+            "description": "Circle: its radius. Defaults to 60.",
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "shape": {
+            "$ref": "#/$defs/Drawing",
+            "default": "circle",
+            "description": "`circle` (default), `rectangle` or `line`."
+          },
+          "to_x": {
+            "default": null,
+            "description": "Rectangle: the opposite corner. Line: where it ends.",
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "to_y": {
+            "default": null,
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "x": {
+            "description": "Circle: the centre. Rectangle: one corner. Line: where it starts. Canvas\ncoordinates, as in `add_device`.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "y": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Drawing": {
+            "oneOf": [
+              {
+                "const": "circle",
+                "description": "A circle, to ring a subnet or a group of devices.",
+                "type": "string"
+              },
+              {
+                "const": "rectangle",
+                "description": "A rectangle, to frame an area such as a building, a floor or a site.",
+                "type": "string"
+              },
+              {
+                "const": "line",
+                "description": "A straight line, to mark a boundary or point at something.",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "color": {
+            "type": "string"
+          },
+          "file": {
+            "description": "The temporary copy Packet Tracer now has open: drawings go through the network\nfile. Your own file is untouched: save with `save_network` and a path to keep the\ndrawing there.",
+            "type": "string"
+          },
+          "fill": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "shape": {
+            "$ref": "#/$defs/Drawing"
+          }
+        },
+        "required": [
+          "id",
+          "shape",
+          "color",
+          "file"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "fast_forward",
+      "title": null,
+      "description": "Press Realtime mode's Fast Forward Time button: timers jump ahead so spanning tree converges, DHCP leases arrive and routing protocols settle at once instead of after 30 seconds or more. Call it after cabling or configuring, before testing connectivity.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "done": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "done"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "get_preferences",
+      "title": null,
+      "description": "Read Packet Tracer's preferences: port labels, link lights, device labels, auto cabling, animation, sound, device dialog tabs, toolbars and more.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "values": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "values"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "host_files",
+      "title": null,
+      "description": "Work with the text files of a PC, laptop or server, the ones its Text Editor opens and `dir` lists: `list`, `read`, `write` (creates or replaces) or `delete` a file in C:\\.",
+      "inputSchema": {
+        "$defs": {
+          "FileAction": {
+            "oneOf": [
+              {
+                "const": "list",
+                "description": "Every file in C:\\ with its size.",
+                "type": "string"
+              },
+              {
+                "const": "read",
+                "description": "The text of `name`.",
+                "type": "string"
+              },
+              {
+                "const": "write",
+                "description": "Create `name` with `text`, or replace its text.",
+                "type": "string"
+              },
+              {
+                "const": "delete",
+                "description": "Remove `name`.",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "action": {
+            "$ref": "#/$defs/FileAction",
+            "default": "list",
+            "description": "`list` (default), `read`, `write` or `delete`."
+          },
+          "device": {
+            "description": "PC, laptop or server.",
+            "type": "string"
+          },
+          "name": {
+            "default": null,
+            "description": "File name in C:\\, for example `notes.txt`. Required except for `list`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "default": null,
+            "description": "Text to write. Required for `write`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "FileAction": {
+            "oneOf": [
+              {
+                "const": "list",
+                "description": "Every file in C:\\ with its size.",
+                "type": "string"
+              },
+              {
+                "const": "read",
+                "description": "The text of `name`.",
+                "type": "string"
+              },
+              {
+                "const": "write",
+                "description": "Create `name` with `text`, or replace its text.",
+                "type": "string"
+              },
+              {
+                "const": "delete",
+                "description": "Remove `name`.",
+                "type": "string"
+              }
+            ]
+          },
+          "FileEntry": {
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "size": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "name",
+              "size"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "action": {
+            "$ref": "#/$defs/FileAction"
+          },
+          "device": {
+            "type": "string"
+          },
+          "files": {
+            "description": "The files in C:\\ after the action.",
+            "items": {
+              "$ref": "#/$defs/FileEntry"
+            },
+            "type": "array"
+          },
+          "text": {
+            "description": "The file's text, for `read`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device",
+          "action",
+          "files"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_devices",
+      "title": null,
+      "description": "List every device in the open network with its model, kind (router, switch, pc, ...) and canvas position. Use the names to target devices in other tools.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Device": {
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "x": {
+                "format": "double",
+                "type": "number"
+              },
+              "y": {
+                "format": "double",
+                "type": "number"
+              }
+            },
+            "required": [
+              "name",
+              "model",
+              "kind",
+              "x",
+              "y"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "devices": {
+            "items": {
+              "$ref": "#/$defs/Device"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "devices"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_drawings",
+      "title": null,
+      "description": "List the circles, rectangles and lines drawn on the logical canvas with their ids and centres.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Drawing": {
+            "oneOf": [
+              {
+                "const": "circle",
+                "description": "A circle, to ring a subnet or a group of devices.",
+                "type": "string"
+              },
+              {
+                "const": "rectangle",
+                "description": "A rectangle, to frame an area such as a building, a floor or a site.",
+                "type": "string"
+              },
+              {
+                "const": "line",
+                "description": "A straight line, to mark a boundary or point at something.",
+                "type": "string"
+              }
+            ]
+          },
+          "DrawingItem": {
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "shape": {
+                "$ref": "#/$defs/Drawing"
+              },
+              "x": {
+                "description": "Centre of the drawing on the canvas.",
+                "format": "int64",
+                "type": "integer"
+              },
+              "y": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "shape",
+              "x",
+              "y"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "drawings": {
+            "items": {
+              "$ref": "#/$defs/DrawingItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "drawings"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_links",
+      "title": null,
+      "description": "List every cable in the network with both endpoints and the cable type.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Endpoint": {
+            "properties": {
+              "device": {
+                "type": "string"
+              },
+              "port": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "device",
+              "port"
+            ],
+            "type": "object"
+          },
+          "Link": {
+            "properties": {
+              "a": {
+                "$ref": "#/$defs/Endpoint"
+              },
+              "b": {
+                "$ref": "#/$defs/Endpoint"
+              },
+              "cable": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "a",
+              "b",
+              "cable"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "links": {
+            "items": {
+              "$ref": "#/$defs/Link"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "links"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_locations",
+      "title": null,
+      "description": "List the physical workspace: Intercity, cities, buildings, wiring closets and racks, each with its path, position and the devices placed in it.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Location": {
+            "properties": {
+              "devices": {
+                "description": "Devices placed directly inside, by their device name.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "kind": {
+                "description": "`city`, `building`, `wiring_closet`, `rack`, `shelf`, `generic_container`, ...",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "description": "Path from Intercity, for example `Home City/Corporate Office`. Empty for Intercity itself.",
+                "type": "string"
+              },
+              "x": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "y": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "path",
+              "name",
+              "kind",
+              "x",
+              "y",
+              "devices"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "locations": {
+            "items": {
+              "$ref": "#/$defs/Location"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "locations"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_models",
+      "title": null,
+      "description": "List the device models this Packet Tracer can create, straight from its hardware catalog, optionally filtered by kind (router, switch, pc, server, access_point, ...). Set include_modules to also list slot modules such as HWIC-2T or NIM-2T, or give a module kind (interface_card, pt_laptop_module, ...) to list only those modules.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "include_modules": {
+            "default": false,
+            "description": "Also list the modules (HWIC, NIM, NM cards) that can be installed in slots.",
+            "type": "boolean"
+          },
+          "kind": {
+            "default": null,
+            "description": "Only models of this kind: a device kind such as `router`, `switch`, `pc`, `server`,\nor a module kind such as `interface_card` or `pt_laptop_module`, which lists modules.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Model": {
+            "properties": {
+              "kind": {
+                "type": "string"
+              },
+              "model": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "model",
+              "kind"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "devices": {
+            "items": {
+              "$ref": "#/$defs/Model"
+            },
+            "type": "array"
+          },
+          "modules": {
+            "items": {
+              "$ref": "#/$defs/Model"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "devices"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_notes",
+      "title": null,
+      "description": "List the text notes on the logical canvas with their ids and positions. Port labels drawn at cable ends are left out unless include_port_labels is true.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "include_port_labels": {
+            "default": false,
+            "description": "Also list the port labels Packet Tracer draws at each end of a cable (`Gig0/0`, `Fa0/1`).",
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Note": {
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "x": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "y": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "id",
+              "text",
+              "x",
+              "y"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "notes": {
+            "items": {
+              "$ref": "#/$defs/Note"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "notes"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_ports",
+      "title": null,
+      "description": "List a device's ports with their state, IPv4 address when they have one, and what each port is connected to. Use it to pick free ports before connect.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "Device name as shown by `list_devices`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Connection": {
+            "properties": {
+              "cable": {
+                "type": "string"
+              },
+              "to": {
+                "$ref": "#/$defs/Endpoint"
+              }
+            },
+            "required": [
+              "to",
+              "cable"
+            ],
+            "type": "object"
+          },
+          "Endpoint": {
+            "properties": {
+              "device": {
+                "type": "string"
+              },
+              "port": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "device",
+              "port"
+            ],
+            "type": "object"
+          },
+          "Port": {
+            "properties": {
+              "connection": {
+                "anyOf": [
+                  {
+                    "$ref": "#/$defs/Connection"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "ip": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "mask": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": "string"
+              },
+              "protocol_up": {
+                "type": "boolean"
+              },
+              "up": {
+                "type": "boolean"
+              },
+              "wireless": {
+                "description": "A radio port with a wireless association instead of a cable.",
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "name",
+              "up",
+              "protocol_up"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "ports": {
+            "items": {
+              "$ref": "#/$defs/Port"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "device",
+          "ports"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_server_services",
+      "title": null,
+      "description": "List the services of a server (DHCP, DNS, HTTP, HTTPS, FTP, SMTP, POP3, NTP, Syslog, TFTP) and whether each one is on.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "Server name.",
+            "type": "string"
+          },
+          "port": {
+            "default": null,
+            "description": "Port whose DHCP service to report. Defaults to `FastEthernet0`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Service": {
+            "enum": [
+              "dhcp",
+              "dns",
+              "http",
+              "https",
+              "ftp",
+              "smtp",
+              "pop3",
+              "ntp",
+              "syslog",
+              "tftp"
+            ],
+            "type": "string"
+          },
+          "ServiceState": {
+            "properties": {
+              "enabled": {
+                "type": "boolean"
+              },
+              "service": {
+                "$ref": "#/$defs/Service"
+              }
+            },
+            "required": [
+              "service",
+              "enabled"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/$defs/ServiceState"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "device",
+          "services"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_simulation_events",
+      "title": null,
+      "description": "Read the simulation event list: where each PDU was, when, which protocol, and whether it was accepted or dropped. With include_decisions, also Packet Tracer's per-layer explanation of each step, the same text as the PDU Details window.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "default": null,
+            "description": "Only events at this device.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "include_decisions": {
+            "default": false,
+            "description": "Include Packet Tracer's explanation of each step (the OSI decisions in PDU Details).",
+            "type": "boolean"
+          },
+          "limit": {
+            "default": null,
+            "description": "Maximum events to return, newest last. Defaults to 50, maximum 500.",
+            "format": "uint",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "protocols": {
+            "default": [],
+            "description": "Only these protocols, for example `[\"ICMP\", \"ARP\"]`. Omit for every protocol.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "SimulationEvent": {
+            "properties": {
+              "decisions": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "destination": {
+                "type": "string"
+              },
+              "device": {
+                "type": "string"
+              },
+              "from": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "index": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "protocol": {
+                "description": "`ICMP`, `ARP`, `STP`, `DHCP`, ...",
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "status": {
+                "description": "`accepted`, `dropped`, `buffered`, `in_transit`, `collided`.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "time": {
+                "description": "Simulation time in milliseconds.",
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "index",
+              "time",
+              "device",
+              "protocol",
+              "status"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/$defs/SimulationEvent"
+            },
+            "type": "array"
+          },
+          "matching": {
+            "description": "Events matching the filters, before `limit`.",
+            "format": "uint",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "total": {
+            "description": "Every event recorded so far.",
+            "format": "uint",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "events",
+          "matching",
+          "total"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "list_slots",
+      "title": null,
+      "description": "List a device's module slots (path, the kind of module each accepts, what is installed) and the module models the device supports.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "Device name as shown by `list_devices`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Slot": {
+            "properties": {
+              "accepts": {
+                "type": "string"
+              },
+              "installed": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "path": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "accepts"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "slots": {
+            "items": {
+              "$ref": "#/$defs/Slot"
+            },
+            "type": "array"
+          },
+          "supported_modules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "device",
+          "slots",
+          "supported_modules"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "move_device",
+      "title": null,
+      "description": "Move a device to a new position on the logical canvas.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "name": {
+            "description": "Device name.",
+            "type": "string"
+          },
+          "x": {
+            "description": "New canvas x of the device center.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "y": {
+            "description": "New canvas y of the device center.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name",
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "x": {
+            "format": "double",
+            "type": "number"
+          },
+          "y": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "model",
+          "kind",
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "move_to_location",
+      "title": null,
+      "description": "Move a device, or a whole location such as a wiring closet, to another place in the physical workspace, for example a switch into `Home City/Corporate Office/Main Wiring Closet`. Devices moved into a wiring closet land on its rack or table.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "default": null,
+            "description": "Device to move, by its name in `list_devices`. Give this or `location`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "into": {
+            "description": "Path of the destination, for example `Home City/Corporate Office/Main Wiring Closet`.\nDevices moved into a wiring closet land on its rack or table, as Packet Tracer\nplaces them.",
+            "type": "string"
+          },
+          "location": {
+            "default": null,
+            "description": "Location to move, by its path in `list_locations`. Give this or `device`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "x_percent": {
+            "default": null,
+            "description": "Where to leave it inside the destination, as a percentage of the room's width and\nheight: 50 and 50 is the middle.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "y_percent": {
+            "default": null,
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "into"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "file": {
+            "description": "The temporary copy Packet Tracer now has open, when the move went through the\nnetwork file. Save with `save_network` and a path to keep it.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "moved": {
+            "description": "The device name or location name that moved.",
+            "type": "string"
+          },
+          "now_in": {
+            "description": "Path of the location it ended up in.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "moved",
+          "now_in"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "network_description",
+      "title": null,
+      "description": "Read the open file's description (the Description button in Packet Tracer), or replace it with `text`.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "text": {
+            "default": null,
+            "description": "New description (HTML or plain text). Omit to only read it.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "html": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "html"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "new_network",
+      "title": null,
+      "description": "Start an empty network. Unsaved changes are discarded unless `save_current_to` gives a path to save them first.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "save_current_to": {
+            "default": null,
+            "description": "Save the current network here first. Without it, unsaved changes are discarded.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Saved": {
+            "properties": {
+              "bytes": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "path": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "bytes"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "cleared": {
+            "type": "boolean"
+          },
+          "saved_previous": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Saved"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "cleared"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "open_network",
+      "title": null,
+      "description": "Open a .pkt or .pka file. Unsaved changes in the current network are discarded unless `save_current_to` gives a path to save them first. Never shows a dialog.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "path": {
+            "description": "Absolute path of a `.pkt` or `.pka` file.",
+            "type": "string"
+          },
+          "save_current_to": {
+            "default": null,
+            "description": "Save the current network here first. Without it, unsaved changes are discarded.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Saved": {
+            "properties": {
+              "bytes": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "path": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "path",
+              "bytes"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "devices": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          },
+          "saved_previous": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Saved"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "path",
+          "devices"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "power_cycle_all",
+      "title": null,
+      "description": "Power cycle every device that is on, like the Power Cycle Devices button but without its confirmation dialog: every device reloads and unsaved configuration on every router and switch is lost. Returns the devices cycled.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "devices": {
+            "description": "Devices that were on and have been switched off and back on.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "devices"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "receive_email",
+      "title": null,
+      "description": "Press Receive in the Email app: download the account's new mail over POP3 and return it. Like a real POP3 client, the mail is removed from the server; Packet Tracer does not expose the app's inbox, so keep what this returns.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "Device whose Email app receives, set up with `configure_email`.",
+            "type": "string"
+          },
+          "timeout_secs": {
+            "default": null,
+            "description": "Seconds to wait for mail. Defaults to 10; an empty mailbox answers after this long.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "ReceivedMail": {
+            "properties": {
+              "body": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              },
+              "from": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "from",
+              "subject",
+              "date",
+              "body"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "mails": {
+            "items": {
+              "$ref": "#/$defs/ReceivedMail"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "device",
+          "mails"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "remove_device",
+      "title": null,
+      "description": "Delete a device and all of its links from the network.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "name": {
+            "description": "Device name as shown by `list_devices`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "removed": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "removed"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "remove_drawing",
+      "title": null,
+      "description": "Remove a circle, rectangle or line from the logical canvas by id.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "id": {
+            "description": "Note id as returned by `add_note` or `list_notes`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "removed": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "removed"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "remove_location",
+      "title": null,
+      "description": "Delete a city, building, wiring closet or rack with everything inside it. Devices must be moved out first (move_to_location); the power units Packet Tracer puts in racks go with it. Packet Tracer has no call for this, so pktctl edits the network as bytes and opens the result as a temporary copy; save with save_network and a path to keep the change.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "path": {
+            "description": "Path of the city, building, wiring closet or rack to delete, as listed by\n`list_locations`. Everything inside it goes too.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "file": {
+            "description": "The temporary copy Packet Tracer now has open. Your own file is untouched: save\nwith `save_network` and a path to keep the change there.",
+            "type": "string"
+          },
+          "power_units_removed": {
+            "description": "Power Distribution Devices that were inside and were removed with it.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "removed": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "removed",
+          "file"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "remove_module",
+      "title": null,
+      "description": "Remove the module in a slot, power cycling the device like add_module. Returns the ports that disappeared with it.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "Router or switch name.",
+            "type": "string"
+          },
+          "slot": {
+            "description": "Slot path holding the module to remove.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "slot"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Endpoint": {
+            "properties": {
+              "device": {
+                "type": "string"
+              },
+              "port": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "device",
+              "port"
+            ],
+            "type": "object"
+          },
+          "Link": {
+            "properties": {
+              "a": {
+                "$ref": "#/$defs/Endpoint"
+              },
+              "b": {
+                "$ref": "#/$defs/Endpoint"
+              },
+              "cable": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "a",
+              "b",
+              "cable"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "cut_links": {
+            "items": {
+              "$ref": "#/$defs/Link"
+            },
+            "type": "array"
+          },
+          "device": {
+            "type": "string"
+          },
+          "module": {
+            "type": "string"
+          },
+          "ports_added": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ports_removed": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "slot": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "slot",
+          "module",
+          "ports_added",
+          "ports_removed"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "remove_note",
+      "title": null,
+      "description": "Delete a note from the logical canvas by id.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "id": {
+            "description": "Note id as returned by `add_note` or `list_notes`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "removed": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "removed"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "rename_device",
+      "title": null,
+      "description": "Rename a device. The new name must not be taken by another device.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "name": {
+            "description": "Current device name.",
+            "type": "string"
+          },
+          "new_name": {
+            "description": "New, unused device name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "new_name"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "kind": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "x": {
+            "format": "double",
+            "type": "number"
+          },
+          "y": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "model",
+          "kind",
+          "x",
+          "y"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "rename_location",
+      "title": null,
+      "description": "Rename a city, building, wiring closet or other location. Packet Tracer has no call for this, so pktctl takes the network as bytes, edits them and opens the result as a temporary copy; your own file is not written, save with save_network and a path to keep the change.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "name": {
+            "description": "New name, for example `Edificio Central`.",
+            "type": "string"
+          },
+          "path": {
+            "description": "Path of the location, as listed by `list_locations`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "name"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Location": {
+            "properties": {
+              "devices": {
+                "description": "Devices placed directly inside, by their device name.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "kind": {
+                "description": "`city`, `building`, `wiring_closet`, `rack`, `shelf`, `generic_container`, ...",
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "description": "Path from Intercity, for example `Home City/Corporate Office`. Empty for Intercity itself.",
+                "type": "string"
+              },
+              "x": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "y": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "path",
+              "name",
+              "kind",
+              "x",
+              "y",
+              "devices"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "file": {
+            "description": "The temporary copy Packet Tracer now has open, when the change went through the\nnetwork file. Your own file is untouched: save with `save_network` and a path to\nkeep the change there.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "location": {
+            "$ref": "#/$defs/Location"
+          }
+        },
+        "required": [
+          "location"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "reset_activity",
+      "title": null,
+      "description": "Reset the open activity to its initial network, discarding the work done in it.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Tally": {
+            "properties": {
+              "correct": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "total": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "correct",
+              "total"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "instruction_pages": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "is_activity": {
+            "type": "boolean"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Tally"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Assessment items (the Check Results tree)."
+          },
+          "password_confirmed": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "percent_complete": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "points": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Tally"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Assessment points."
+          },
+          "score_percent": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "seconds_elapsed": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "seconds_left": {
+            "description": "Seconds left when the activity has a countdown timer.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "file",
+          "is_activity"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "run_cli",
+      "title": null,
+      "description": "Type one IOS command at the console of a router or switch and return its output, including commands that take time such as ping or traceroute. `status` tells whether IOS accepted the command. A command still running after `timeout_secs` is stopped with Ctrl+Shift+6 and comes back with `finished: false` and the output so far. When IOS asks something ([confirm], [yes/no], Password:) the reply carries `question` and the console keeps waiting: answer with another run_cli in mode `current`, an empty command for Enter.",
+      "inputSchema": {
+        "$defs": {
+          "CliMode": {
+            "enum": [
+              "user",
+              "enable",
+              "global",
+              "current"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "command": {
+            "description": "One IOS command, for example `show ip interface brief`. To answer a question the\nprevious command left open (`question` in its reply), send the answer here with mode\n`current`; an empty command presses Enter, which confirms `[confirm]`.",
+            "type": "string"
+          },
+          "device": {
+            "description": "Device name exactly as shown by `list_devices`.",
+            "type": "string"
+          },
+          "enable_password": {
+            "default": null,
+            "description": "Privileged mode password (`enable secret` or `enable password`).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mode": {
+            "$ref": "#/$defs/CliMode",
+            "description": "Mode to run the command in. Defaults to `enable`."
+          },
+          "password": {
+            "default": null,
+            "description": "Console line password, when the device asks for one at `Password:`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timeout_secs": {
+            "default": null,
+            "description": "Seconds to wait for the command to finish. Defaults to 30, maximum 300.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device",
+          "command"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "CommandStatus": {
+            "enum": [
+              "ok",
+              "ambiguous",
+              "invalid",
+              "incomplete",
+              "not_implemented"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "finished": {
+            "type": "boolean"
+          },
+          "output": {
+            "type": "string"
+          },
+          "question": {
+            "description": "The question the command is waiting on, such as `Proceed with reload? [confirm]`.\nAnswer it with another call in `current` mode; an empty command presses Enter.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/CommandStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "finished",
+          "output"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "run_host_command",
+      "title": null,
+      "description": "Run a command in the Command Prompt of a PC, laptop or server (ping, ipconfig, tracert, nslookup, arp -a) and return its output. Waits until the command finishes; a command still running after `timeout_secs` (ping -t) is stopped with Ctrl+C and comes back with `finished: false` and the output so far.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "command": {
+            "description": "Command Prompt command, for example `ping 192.168.1.1` or `ipconfig /all`.",
+            "type": "string"
+          },
+          "device": {
+            "description": "PC, laptop or server name as returned by `list_devices`.",
+            "type": "string"
+          },
+          "timeout_secs": {
+            "default": null,
+            "description": "Seconds to wait for the command to finish. Defaults to 30, maximum 300.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device",
+          "command"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "CommandStatus": {
+            "enum": [
+              "ok",
+              "ambiguous",
+              "invalid",
+              "incomplete",
+              "not_implemented"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "finished": {
+            "type": "boolean"
+          },
+          "output": {
+            "type": "string"
+          },
+          "question": {
+            "description": "The question the command is waiting on, such as `Proceed with reload? [confirm]`.\nAnswer it with another call in `current` mode; an empty command presses Enter.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/CommandStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "finished",
+          "output"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "save_network",
+      "title": null,
+      "description": "Save the open network as a .pkt file, without any dialog. Give an absolute path, or omit it to save over the file already open.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "path": {
+            "default": null,
+            "description": "Absolute path ending in `.pkt`. Omit it to save over the file already open.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "bytes": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "bytes"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "screenshot",
+      "title": null,
+      "description": "Capture Packet Tracer as a PNG image: the logical workspace rendered by Packet Tracer (default), the physical workspace (`view: physical`, which switches views for a moment), or the window as it is with any dialog open (`view: window`). Optionally also write it to an absolute .png path.",
+      "inputSchema": {
+        "$defs": {
+          "View": {
+            "oneOf": [
+              {
+                "const": "logical",
+                "description": "The logical workspace, rendered by Packet Tracer.",
+                "type": "string"
+              },
+              {
+                "const": "physical",
+                "description": "The physical workspace from Intercity, captured from Packet Tracer's window.",
+                "type": "string"
+              },
+              {
+                "const": "physical_rack",
+                "description": "The physical workspace inside the main wiring closet, showing its rack.",
+                "type": "string"
+              },
+              {
+                "const": "window",
+                "description": "Packet Tracer's window as it is now, dialogs included.",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "save_to": {
+            "default": null,
+            "description": "Also write the PNG to this absolute path, for example for a lab report.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "view": {
+            "$ref": "#/$defs/View",
+            "description": "`logical` (default), `physical` (Intercity), `physical_rack` (main wiring closet), or\n`window`. All but `logical` capture Packet Tracer's own window through the operating\nsystem."
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": null,
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "send_email",
+      "title": null,
+      "description": "Send an email from the account set up with configure_email and wait for the SMTP server's answer. A recipient the server does not know comes back later as a delivery failure in receive_email.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "device": {
+            "description": "Device whose Email app sends, set up with `configure_email`.",
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "timeout_secs": {
+            "default": null,
+            "description": "Seconds to wait for the server. Defaults to 30, maximum 300.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "to": {
+            "description": "Recipient address, for example `admin@gamc.bo`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "to",
+          "subject",
+          "body"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "from",
+          "to",
+          "subject"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "set_background",
+      "title": null,
+      "description": "Paper a physical location (a city, building, room or rack) with a background image, or the logical workspace when no location is given. Takes one of Packet Tracer's own backgrounds (grid_10x10, grid_25x25, grid_50x50, grid_100x100, city, building, intercity, container) or the absolute path of an image; an empty image clears it.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "image": {
+            "description": "One of Packet Tracer's own backgrounds (`grid_10x10`, `grid_25x25`, `grid_50x50`,\n`grid_100x100`, `city`, `building`, `intercity`, `container`) or the absolute path of\nan image file. An empty value clears it.",
+            "type": "string"
+          },
+          "location": {
+            "default": null,
+            "description": "Path of the physical location to paper, as listed by `list_locations`. Omit to change\nthe logical workspace's background instead.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tiled": {
+            "default": false,
+            "description": "Repeat the image instead of stretching it.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "image"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "image": {
+            "description": "The path Packet Tracer now has.",
+            "type": "string"
+          },
+          "target": {
+            "description": "The location that got the background, or `logical workspace`.",
+            "type": "string"
+          },
+          "tiled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "target",
+          "image",
+          "tiled"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "set_host_firewall",
+      "title": null,
+      "description": "Use the Firewall and IPv6 Firewall apps of a PC, laptop or server: switch each one on or off, add rules (permit or deny ip, icmp, tcp or udp, by remote address and port) and remove them. Returns both switches and the rules in the order the firewall evaluates them.",
+      "inputSchema": {
+        "$defs": {
+          "Family": {
+            "enum": [
+              "ipv4",
+              "ipv6"
+            ],
+            "type": "string"
+          },
+          "FirewallRule": {
+            "properties": {
+              "action": {
+                "$ref": "#/$defs/RuleAction",
+                "description": "`permit` or `deny`."
+              },
+              "family": {
+                "$ref": "#/$defs/Family",
+                "default": "ipv4",
+                "description": "`ipv4` (default) or `ipv6`."
+              },
+              "port": {
+                "default": null,
+                "description": "Port for tcp and udp, for example 80. Packet Tracer keeps one port per rule.",
+                "format": "int32",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
+              "protocol": {
+                "description": "`ip`, `icmp`, `tcp` or `udp`.",
+                "type": "string"
+              },
+              "remote_ip": {
+                "default": null,
+                "description": "Remote address the rule matches. Defaults to any.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "remote_mask": {
+                "default": null,
+                "description": "IPv4: wildcard mask (`0.0.0.0` for one host, `255.255.255.255` for any).\nIPv6: prefix length (`128` for one host, `0` for any).",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "action",
+              "protocol"
+            ],
+            "type": "object"
+          },
+          "RuleAction": {
+            "enum": [
+              "permit",
+              "deny"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "add_rules": {
+            "description": "Rules to add, in the order the firewall will evaluate them.",
+            "items": {
+              "$ref": "#/$defs/FirewallRule"
+            },
+            "type": "array"
+          },
+          "device": {
+            "description": "PC, laptop or server name.",
+            "type": "string"
+          },
+          "ipv4": {
+            "default": null,
+            "description": "Switch the IPv4 inbound firewall on or off. Omit to leave it as it is.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "ipv6": {
+            "default": null,
+            "description": "Switch the IPv6 inbound firewall on or off. Omit to leave it as it is.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "port": {
+            "default": null,
+            "description": "Network port. Defaults to `FastEthernet0`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "remove_rules": {
+            "description": "Rules to remove; they must match an existing rule exactly.",
+            "items": {
+              "$ref": "#/$defs/FirewallRule"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "ipv4": {
+            "type": "boolean"
+          },
+          "ipv4_rules": {
+            "description": "IPv4 rules as the firewall lists them, in order.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "ipv6": {
+            "type": "boolean"
+          },
+          "ipv6_rules": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "port": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "port",
+          "ipv4",
+          "ipv6",
+          "ipv4_rules",
+          "ipv6_rules"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "set_power",
+      "title": null,
+      "description": "Switch a device on or off. Switching a router or switch off and on reloads it: configuration that was not saved with write memory is lost. IOS devices come back ready at the prompt.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "description": "Device name as returned by `list_devices`.",
+            "type": "string"
+          },
+          "on": {
+            "description": "`true` to switch it on, `false` to switch it off.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "device",
+          "on"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "on": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "device",
+          "on"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "set_preferences",
+      "title": null,
+      "description": "Change Packet Tracer preferences by name, for example `{ \"values\": { \"show_port_labels\": true } }`. Returns every preference afterwards.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "values": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "description": "Preferences to change, for example `{ \"show_port_labels\": true, \"disable_auto_cabling\": true }`.\n`get_preferences` lists every name.",
+            "type": "object"
+          }
+        },
+        "required": [
+          "values"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "values": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "values"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "set_server_service",
+      "title": null,
+      "description": "Switch one service of a server on or off, as in its Services tab.",
+      "inputSchema": {
+        "$defs": {
+          "Service": {
+            "enum": [
+              "dhcp",
+              "dns",
+              "http",
+              "https",
+              "ftp",
+              "smtp",
+              "pop3",
+              "ntp",
+              "syslog",
+              "tftp"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "port": {
+            "default": null,
+            "description": "For DHCP: the port the service runs on. Defaults to `FastEthernet0`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "service": {
+            "$ref": "#/$defs/Service"
+          }
+        },
+        "required": [
+          "device",
+          "service",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Service": {
+            "enum": [
+              "dhcp",
+              "dns",
+              "http",
+              "https",
+              "ftp",
+              "smtp",
+              "pop3",
+              "ntp",
+              "syslog",
+              "tftp"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "service": {
+            "$ref": "#/$defs/Service"
+          }
+        },
+        "required": [
+          "service",
+          "enabled"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "set_web_page",
+      "title": null,
+      "description": "Write a page of a server's HTTP service, for example index.html.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "contents": {
+            "description": "HTML contents.",
+            "type": "string"
+          },
+          "device": {
+            "type": "string"
+          },
+          "url": {
+            "description": "Page name, for example `index.html`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "url",
+          "contents"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "bytes": {
+            "format": "uint",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "device": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "url",
+          "bytes"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "setup_exapp",
+      "title": null,
+      "description": "Create the Packet Tracer app registration file (.pta) for pktctl's configured app id and secret, using Packet Tracer's own `meta` tool, and return the one-time steps to register it. Works while Packet Tracer still rejects pktctl.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "app_id": {
+            "type": "string"
+          },
+          "meta_tool": {
+            "type": "string"
+          },
+          "pta": {
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "app_id",
+          "pta",
+          "meta_tool",
+          "steps"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "show_workspace",
+      "title": null,
+      "description": "Switch Packet Tracer's main window between the logical and the physical workspace, for example before a screenshot or a class demo.",
+      "inputSchema": {
+        "$defs": {
+          "View": {
+            "enum": [
+              "logical",
+              "physical"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "view": {
+            "$ref": "#/$defs/View",
+            "description": "Which workspace Packet Tracer should show."
+          }
+        },
+        "required": [
+          "view"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "physical": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "physical"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "simulation_mode",
+      "title": null,
+      "description": "Switch between Realtime and Simulation mode. Returns the mode, the simulation clock and how many events are recorded.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "on": {
+            "description": "`true` for Simulation mode, `false` for Realtime.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "on"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "current_event": {
+            "description": "Index of the event the simulation is at; `back` moves it without deleting events.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "events": {
+            "description": "Events recorded so far.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "simulation": {
+            "type": "boolean"
+          },
+          "time": {
+            "description": "Simulation clock in milliseconds.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "simulation",
+          "time",
+          "events",
+          "current_event"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "simulation_step",
+      "title": null,
+      "description": "Advance the simulation (`forward`, like Capture/Forward), go `back`, or `reset` the event list. Needs Simulation mode.",
+      "inputSchema": {
+        "$defs": {
+          "StepAction": {
+            "enum": [
+              "forward",
+              "back",
+              "reset"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "action": {
+            "$ref": "#/$defs/StepAction",
+            "description": "`forward` (Capture/Forward), `back`, or `reset` (clears the event list)."
+          },
+          "times": {
+            "default": null,
+            "description": "How many steps for `forward` and `back`. Defaults to 1, maximum 200.",
+            "format": "uint32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "current_event": {
+            "description": "Index of the event the simulation is at; `back` moves it without deleting events.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "events": {
+            "description": "Events recorded so far.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "simulation": {
+            "type": "boolean"
+          },
+          "time": {
+            "description": "Simulation clock in milliseconds.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "simulation",
+          "time",
+          "events",
+          "current_event"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "status",
+      "title": null,
+      "description": "Check whether Packet Tracer is reachable and summarize the open network. When it is not reachable, `problem` explains what to fix.",
+      "inputSchema": {
+        "properties": {},
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "addr": {
+            "description": "Where Packet Tracer answered, for example `127.0.0.1:39001` after a restart.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "connected": {
+            "type": "boolean"
+          },
+          "devices": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "links": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "problem": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pt_version": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "connected"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "tp_demarrer",
+      "description": "Open Packet Tracer installed on this PC, then call status to verify the connection.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tp_diagnostic",
+      "description": "Check connector status, engine version, directories and the live connection to Packet Tracer.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tp_lire",
+      "description": "Read PDF/Word/text instructions, including tables. Paginate using offset; report scanned PDFs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "max_chars": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tp_lister",
+      "description": "Find .pka/.pkt labs and PDF/Word instructions in Downloads and working copies.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          }
+        },
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tp_preparer",
+      "description": "Copy a .pka/.pkt into a unique working directory; return working_file to open. Preserve the original and its SHA256.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tp_rapport",
+      "description": "Save a Markdown report of steps, commands, evidence, results and limitations in the working directory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "overwrite": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path",
+          "content"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tp_vlsm",
+      "description": "Calculate and validate a non-overlapping IPv4 VLSM plan (LAN convention: exclude network/broadcast addresses, minimum /30).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "network": {
+            "type": "string"
+          },
+          "lans": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "hosts": {
+                  "type": "integer",
+                  "minimum": 1
+                }
+              },
+              "required": [
+                "name",
+                "hosts"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "network",
+          "lans"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ui_click",
+      "description": "Click in Cisco after a recent observation, using relative coordinates. Right-click and double-click are available.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "window_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "x": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "mouse_button": {
+            "enum": [
+              "left",
+              "right",
+              "middle"
+            ]
+          },
+          "click_count": {
+            "enum": [
+              1,
+              2
+            ]
+          }
+        },
+        "required": [
+          "window_id",
+          "x",
+          "y"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ui_drag",
+      "description": "Drag an element between two points in the same Cisco window, such as a module or physical object. Observe before and after.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "window_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "from_x": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "from_y": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "to_x": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "to_y": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "window_id",
+          "from_x",
+          "from_y",
+          "to_x",
+          "to_y"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ui_inspect",
+      "description": "Read the elements and focus of a Cisco window before interacting. Repeat after each action.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "window_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "max_nodes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 300
+          }
+        },
+        "required": [
+          "window_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ui_press_keys",
+      "description": "Send a simple key chord to Cisco: CTRL+SHIFT+C, ENTER, TAB, ESC, ALT+F4... Return the new state.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "window_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "keys": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "window_id",
+          "keys"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ui_screenshot",
+      "description": "View a verified Cisco window as a PNG for features without an API. Reject black captures; do not capture the desktop.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "window_id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "window_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ui_scroll",
+      "description": "Scroll a Cisco area under point x,y; positive ticks scroll up, negative ticks scroll down.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "window_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "x": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "y": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "ticks": {
+            "type": "integer",
+            "minimum": -100,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "window_id",
+          "x",
+          "y",
+          "ticks"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ui_type_text",
+      "description": "Type literal text in Cisco. Check the field and focus immediately beforehand. Return the state after typing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "window_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "window_id",
+          "text"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "ui_windows",
+      "description": "List Cisco Packet Tracer windows, including dialogs. Use the returned window_id values.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "unlock_activity",
+      "title": null,
+      "description": "Give a password-protected activity its password (for its author or instructor) so Packet Tracer reports scores and runs checks. activity_status shows password_confirmed: false when this is needed.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "password": {
+            "description": "The activity's password, as set by its author.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Tally": {
+            "properties": {
+              "correct": {
+                "format": "int64",
+                "type": "integer"
+              },
+              "total": {
+                "format": "int64",
+                "type": "integer"
+              }
+            },
+            "required": [
+              "correct",
+              "total"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "file": {
+            "type": "string"
+          },
+          "instruction_pages": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "is_activity": {
+            "type": "boolean"
+          },
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Tally"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Assessment items (the Check Results tree)."
+          },
+          "password_confirmed": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "percent_complete": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "points": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Tally"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Assessment points."
+          },
+          "score_percent": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "seconds_elapsed": {
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "seconds_left": {
+            "description": "Seconds left when the activity has a countdown timer.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "file",
+          "is_activity"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "vpn_client",
+      "title": null,
+      "description": "Use the VPN app of a PC, laptop or server against an Easy VPN server: `connect` with server, group, group_key, username and password and wait for the tunnel, `disconnect`, or `status`. Returns whether the tunnel is up and the address the server assigned.",
+      "inputSchema": {
+        "$defs": {
+          "VpnAction": {
+            "oneOf": [
+              {
+                "const": "status",
+                "description": "Report whether the tunnel is up and its address.",
+                "type": "string"
+              },
+              {
+                "const": "connect",
+                "description": "Fill in the VPN app and press Connect.",
+                "type": "string"
+              },
+              {
+                "const": "disconnect",
+                "description": "Press Disconnect.",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "action": {
+            "$ref": "#/$defs/VpnAction",
+            "default": "status",
+            "description": "`status` (default), `connect` or `disconnect`."
+          },
+          "device": {
+            "description": "PC, laptop or server whose VPN app to use.",
+            "type": "string"
+          },
+          "group": {
+            "default": null,
+            "description": "Connect: the group name, as in `crypto isakmp client configuration group`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "group_key": {
+            "default": null,
+            "description": "Connect: Group Key, the group's `key`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "password": {
+            "default": null,
+            "description": "Connect: that user's password.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "server": {
+            "default": null,
+            "description": "Connect: Host IP, the Easy VPN server's address.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timeout_secs": {
+            "default": null,
+            "description": "Seconds to wait for the tunnel. Defaults to 15, maximum 300.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "username": {
+            "default": null,
+            "description": "Connect: user name the server authenticates.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "connected": {
+            "type": "boolean"
+          },
+          "device": {
+            "type": "string"
+          },
+          "group": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "server": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tunnel_ip": {
+            "description": "The address the server assigned inside the tunnel.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "device",
+          "connected"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "watch_events",
+      "title": null,
+      "description": "Listen to Packet Tracer's live IPC events for a few seconds and return them: devices and links added or removed, console output, simulation steps, ARP and DHCP activity, and 200 more across 73 classes. Start something (for example with another tool call in parallel, or by hand in Packet Tracer) and see what it triggers. describe_ipc with `events` lists the classes and names.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "class": {
+            "description": "Object class raising the events, for example `LogicalWorkspace`, `TerminalLine` or\n`Simulation`. `describe_ipc` with `events` lists them all.",
+            "type": "string"
+          },
+          "events": {
+            "default": [],
+            "description": "Event names, for example `[\"deviceAdded\", \"linkCreated\"]`. Omit for every event of the class.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "max_events": {
+            "default": null,
+            "description": "Stop after this many events. Defaults to 100, maximum 1000.",
+            "format": "uint",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "object": {
+            "default": null,
+            "description": "Only events from this object, by uuid (as returned by `call_ipc`). Omit for every object.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "seconds": {
+            "default": null,
+            "description": "How long to listen. Defaults to 10 seconds, maximum 120.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "class"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "WatchedEvent": {
+            "properties": {
+              "args": {
+                "items": true,
+                "type": "array"
+              },
+              "class": {
+                "type": "string"
+              },
+              "event": {
+                "type": "string"
+              },
+              "object": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "class",
+              "object",
+              "event",
+              "args"
+            ],
+            "type": "object"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "events": {
+            "items": {
+              "$ref": "#/$defs/WatchedEvent"
+            },
+            "type": "array"
+          },
+          "truncated": {
+            "description": "True when `max_events` stopped the watch before `seconds` elapsed.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "events",
+          "truncated"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    },
+    {
+      "name": "wireless_status",
+      "title": null,
+      "description": "Read the wireless settings of an access point, wireless router or client, and for clients which access point they are associated with.",
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "device": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "type": "object"
+      },
+      "outputSchema": {
+        "$defs": {
+          "Security": {
+            "enum": [
+              "open",
+              "wep",
+              "wpa_psk",
+              "wpa2_psk"
+            ],
+            "type": "string"
+          }
+        },
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "access_point": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "broadcast_ssid": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "device": {
+            "type": "string"
+          },
+          "role": {
+            "description": "`access_point` or `client`.",
+            "type": "string"
+          },
+          "security": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Security"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ssid": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "device",
+          "role",
+          "ssid"
+        ],
+        "type": "object"
+      },
+      "icons": null,
+      "annotations": {
+        "title": null,
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      },
+      "meta": null,
+      "execution": null
+    }
+  ]
+}
