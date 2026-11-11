@@ -1,6 +1,6 @@
 {
   "engine": "pktctl 0.2.2",
-  "connector": "1.0.0",
+  "connector": "1.1.0",
   "tools": [
     {
       "name": "activity_instructions",

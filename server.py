@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import argparse
 import base64
 from contextlib import AsyncExitStack
 from datetime import datetime, timedelta
@@ -18,8 +19,10 @@ from mcp.server.lowlevel import Server
 from mcp.server.stdio import stdio_server
 
 from coursework import LabFiles, plan_vlsm
+from install import default_install_root
 
 ROOT = Path(__file__).resolve().parent
+CONNECTOR_VERSION = "1.1.0"
 INSTRUCTIONS = """Control Cisco Packet Tracer and complete course labs. Start with tp_lister and
 tp_lire, then tp_preparer and open_network using working_file. Read activity_instructions
 and the topology before making changes. Follow the lab addresses, names and steps.
@@ -79,9 +82,10 @@ PKT_ONLY = {"add_location", "rename_location", "remove_location", "arrange_devic
 
 
 class Gateway:
-    def __init__(self, settings, engine):
+    def __init__(self, settings, engine, runtime_root=None):
         self.settings = settings
         self.engine = engine
+        self.runtime_root = Path(runtime_root).resolve() if runtime_root is not None else ROOT
         self.files = LabFiles(Path(settings["downloads"]), Path(settings["workspace"]))
         self.native = {}
         self.lock = asyncio.Lock()
@@ -144,13 +148,13 @@ class Gateway:
             if name == "setup_exapp":
                 # Cisco places meta.exe in bin on Windows, unlike pktctl's finder.
                 from install import compile_registration
-                pta = compile_registration(self.settings)
+                pta = compile_registration(self.settings, self.runtime_root)
                 return {"app_id":self.settings["app_id"],"pta":str(pta),
                         "meta_tool":str(Path(self.settings["packet_tracer_home"])/"bin/meta.exe"),
                         "steps":["In Cisco: Extensions > IPC > Configure Apps > Add, select this .pta file.",
                                  "Exit Cisco normally once to save, then reopen it and call status."]}
             if name == "tp_diagnostic":
-                return {"connector":"1.0.0", "engine":"pktctl 0.2.2", "native_tools":len(self.native),
+                return {"connector":CONNECTOR_VERSION, "engine":"pktctl 0.2.2", "native_tools":len(self.native),
                         "downloads":str(self.files.downloads), "workspace":str(self.files.workspace),
                         "packet_tracer":await self.data("status",{}),
                         "limits":["Some windows do not have a Cisco API.", "Scores for protected activities may require the author password.",
@@ -189,40 +193,67 @@ class Gateway:
             return await self.raw(name, args)
 
 
-async def main():
-    settings_path = Path(os.environ.get("PACKETTRACER_MCP_SETTINGS", ROOT / "settings.json"))
-    settings = json.loads(settings_path.read_text(encoding="utf-8"))
+def load_runtime(settings_file=None, runtime_dir=None):
+    """Resolve configuration independently of the client's working directory."""
+    selected = settings_file or os.environ.get("PACKETTRACER_MCP_SETTINGS")
+    if selected is None:
+        adjacent = ROOT / "settings.json"
+        selected = adjacent if adjacent.is_file() else default_install_root() / "settings.json"
+    settings_path = Path(selected).expanduser().resolve()
+    settings = json.loads(settings_path.read_text(encoding="utf-8-sig"))
+    if not isinstance(settings, dict):
+        raise ValueError("The settings file must contain a JSON object.")
+    for field in ("app_id", "secret", "downloads", "workspace", "packet_tracer_home"):
+        if not isinstance(settings.get(field), str) or not settings[field].strip():
+            raise ValueError(f"Missing or invalid settings field: {field}")
+    runtime_root = Path(runtime_dir).expanduser().resolve() if runtime_dir else settings_path.parent
+    return settings_path, runtime_root, settings
+
+
+def build_server(gateway):
+    """Expose the same standard MCP contract to every compatible client."""
+    server = Server("packettracer", version=CONNECTOR_VERSION, instructions=INSTRUCTIONS)
+
+    @server.list_tools()
+    async def list_tools():
+        return list(gateway.native.values()) + LOCAL_TOOLS + UI_TOOLS
+
+    @server.call_tool()
+    async def call_tool(name, arguments):
+        try:
+            result = await gateway.call(name, arguments or {})
+            if isinstance(result, types.CallToolResult):
+                return result
+            return types.CallToolResult(content=[types.TextContent(type="text", text=json.dumps(result, ensure_ascii=False))], structuredContent=result)
+        except Exception as error:
+            return types.CallToolResult(isError=True, content=[types.TextContent(type="text", text=str(error))])
+
+    return server
+
+
+async def main(settings_file=None, runtime_dir=None):
+    _, runtime_root, settings = load_runtime(settings_file, runtime_dir)
     env = dict(os.environ, PKTCTL_APP_ID=settings["app_id"], PKTCTL_SECRET=settings["secret"],
                PKTCTL_CALL_TIMEOUT_SECS="30", PKTCTL_PT_HOME=settings["packet_tracer_home"],
-               PKTCTL_SETUP_DIR=str(ROOT / "registration"))
+               PKTCTL_SETUP_DIR=str(runtime_root / "registration"))
     if settings.get("address"):
         env["PKTCTL_ADDR"] = settings["address"]
     async with AsyncExitStack() as stack:
         reader, writer = await stack.enter_async_context(stdio_client(StdioServerParameters(
-            command=str(ROOT / "vendor/pktctl.exe"), env=env)))
+            command=str(runtime_root / "vendor/pktctl.exe"), env=env, cwd=str(runtime_root))))
         engine = await stack.enter_async_context(ClientSession(reader, writer))
         await engine.initialize()
-        gateway = Gateway(settings, engine)
+        gateway = Gateway(settings, engine, runtime_root)
         gateway.native = {t.name:t for t in (await engine.list_tools()).tools}
-        server = Server("packettracer", version="1.0.0", instructions=INSTRUCTIONS)
-
-        @server.list_tools()
-        async def list_tools():
-            return list(gateway.native.values()) + LOCAL_TOOLS + UI_TOOLS
-
-        @server.call_tool()
-        async def call_tool(name, arguments):
-            try:
-                result = await gateway.call(name, arguments or {})
-                if isinstance(result, types.CallToolResult):
-                    return result
-                return types.CallToolResult(content=[types.TextContent(type="text", text=json.dumps(result, ensure_ascii=False))], structuredContent=result)
-            except Exception as error:
-                return types.CallToolResult(isError=True, content=[types.TextContent(type="text", text=str(error))])
+        server = build_server(gateway)
 
         async with stdio_server() as (read_stream, write_stream):
             await server.run(read_stream, write_stream, server.create_initialization_options())
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description="Local Cisco Packet Tracer MCP stdio server.")
+    parser.add_argument("--settings",help="Settings JSON file; overrides PACKETTRACER_MCP_SETTINGS.")
+    parser.add_argument("--runtime-dir",help="Directory containing vendor/pktctl.exe; defaults to the settings directory.")
+    arguments = parser.parse_args()
+    asyncio.run(main(arguments.settings, arguments.runtime_dir))

@@ -1,6 +1,6 @@
 # Tool reference
 
-The gateway exposes 87 tools: 72 native tools, seven course helpers and eight Windows controls. Tool names below are unprefixed; Vibe adds `packettracer_`.
+The gateway exposes 87 tools: 72 native tools, seven course helpers and eight Windows controls. Tool names below are the names advertised by the server. An MCP client may display a namespace or prefix; discover the tools through your client and use the names it exposes. No particular client is required.
 
 The complete input schemas are available in [tool-schemas.json](tool-schemas.json). Required arguments are listed below; consult the schema for optional fields, enums and return descriptions.
 

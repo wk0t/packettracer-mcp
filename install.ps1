@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$Archive,
-    [switch]$SkipVibe,
+    [string]$InstallDir,
     [string]$PacketTracerHome
 )
 
@@ -15,7 +15,7 @@ if (-not (Test-Path -LiteralPath $uvPath -PathType Leaf)) {
 
 $installerArgs = @()
 if ($Archive) { $installerArgs += @('--archive', $Archive) }
-if ($SkipVibe) { $installerArgs += '--skip-vibe' }
+if ($InstallDir) { $installerArgs += @('--install-dir', $InstallDir) }
 if ($PacketTracerHome) { $installerArgs += @('--packet-tracer-home', $PacketTracerHome) }
 & $uvPath run --no-project --python 3.12 python $installer @installerArgs
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

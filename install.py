@@ -16,7 +16,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import tomllib
 import urllib.request
 import uuid
 from xml.sax.saxutils import escape
@@ -28,10 +27,13 @@ ARCHIVE_URL = f"https://github.com/TantiE100/pktctl/releases/download/v{VERSION}
 ARCHIVE_SHA256 = "d4914f50e33a0673c78225a591b4ab28884301713a3561abceb126461c0f9cb8"
 SOURCE = Path(__file__).resolve().parent
 HOME = Path.home()
-EXTENSION = HOME / ".vibe" / "extensions" / "packettracer-mcp"
-SKILL = HOME / ".vibe" / "skills" / "packettracer-tp" / "SKILL.md"
-CONFIG = HOME / ".vibe" / "config.toml"
 NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+
+
+def default_install_root() -> Path:
+    local_app_data = os.environ.get("LOCALAPPDATA")
+    base = Path(local_app_data) if local_app_data else HOME / "AppData" / "Local"
+    return (base / "PacketTracerMCP").resolve()
 
 
 def run(arguments: list[str], *, capture: bool = False) -> subprocess.CompletedProcess:
@@ -89,10 +91,10 @@ def discover_packet_tracer(explicit: str | None, settings: dict) -> Path:
     raise RuntimeError("Packet Tracer with bin/PacketTracer.exe and bin/meta.exe was not found. Use --packet-tracer-home PATH.")
 
 
-def install_vendor(archive: Path) -> None:
+def install_vendor(archive: Path, install_root: Path) -> None:
     if fingerprint(archive) != ARCHIVE_SHA256:
         raise RuntimeError("The pktctl archive SHA-256 does not match the expected release. Installation stopped.")
-    vendor = EXTENSION / "vendor"
+    vendor = install_root / "vendor"
     with zipfile.ZipFile(archive) as package:
         contents = {}
         for leaf in ("pktctl.exe", "LICENSE", "README.md", "CHANGELOG.md"):
@@ -133,7 +135,7 @@ def save_settings(settings_path: Path, old_bytes: bytes | None, settings: dict) 
             private_file(settings_path)
 
 
-def compile_registration(settings: dict) -> Path:
+def compile_registration(settings: dict, install_root: Path | None = None) -> Path:
     for key in ("app_id", "secret"):
         value = settings.get(key)
         if not isinstance(value, str) or not re.fullmatch(r"[A-Za-z0-9._-]+", value):
@@ -151,9 +153,9 @@ def compile_registration(settings: dict) -> Path:
         '</SECURITY_SETTINGS>', '<LOADING>ON_DEMAND</LOADING>', '<SAVING>NEVER</SAVING>',
         '<INSTANCES>1</INSTANCES>', '</PT_APP_META>',
     ]
-    registration = EXTENSION / "registration"
+    registration = (install_root if install_root is not None else SOURCE) / "registration"
     registration.mkdir(parents=True, exist_ok=True)
-    destination = registration / "vibe-packettracer.pta"
+    destination = registration / "packettracer-mcp.pta"
     # The temporary XML contains a secret; it is private and removed in all cases.
     xml = registration / (".meta-" + uuid.uuid4().hex + ".xml")
     staged = registration / (".meta-" + uuid.uuid4().hex + ".pta")
@@ -173,41 +175,20 @@ def compile_registration(settings: dict) -> Path:
     return destination
 
 
-def register_vibe(python: Path, initial_hash: str | None) -> str:
-    if fingerprint(CONFIG) != initial_hash:
-        raise RuntimeError("The Vibe configuration changed during installation. It was preserved; rerun the installer to register the server.")
-    raw = CONFIG.read_bytes() if CONFIG.is_file() else b""
-    config = tomllib.loads(raw.decode("utf-8-sig")) if raw else {}
-    expected = {"name": "packettracer", "transport": "stdio", "command": str(python), "args": [str(EXTENSION / "server.py")], "startup_timeout_sec": 20, "tool_timeout_sec": 180}
-    matches = [s for s in config.get("mcp_servers", []) if s.get("name") == "packettracer"]
-    if matches:
-        if len(matches) == 1 and all(matches[0].get(k) == v for k, v in expected.items()):
-            return "already_registered"
-        raise RuntimeError("A different Vibe packettracer entry already exists. It was preserved; review that entry or use --skip-vibe.")
-    vibe = find_command("vibe")
-    backup = None
-    if raw:
-        backup = CONFIG.with_name("config.toml.before-packettracer-" + uuid.uuid4().hex + ".bak")
-        with backup.open("xb") as stream:
-            stream.write(raw)
-        private_file(backup)
-    if fingerprint(CONFIG) != initial_hash:
-        raise RuntimeError("The Vibe configuration changed just before registration; registration was not started.")
-    # The native CLI reads the live configuration. Never replace it from our snapshot.
-    run([str(vibe), "mcp", "add", "packettracer", "--transport", "stdio", "--command", str(python),
-         "--arg", str(EXTENSION / "server.py"), "--startup-timeout-sec", "20", "--tool-timeout-sec", "180"], capture=True)
-    updated = tomllib.loads(CONFIG.read_text(encoding="utf-8-sig"))
-    entries = [s for s in updated.get("mcp_servers", []) if s.get("name") == "packettracer"]
-    if len(entries) != 1 or any(entries[0].get(k) != v for k, v in expected.items()):
-        # Restoring the whole backup would destroy concurrent edits, so leave it intact.
-        raise RuntimeError("Vibe registration could not be verified. The current configuration and its backup were preserved.")
-    return "registered"
+def write_mcp_config(python: Path, install_root: Path) -> Path:
+    fragment = {"mcpServers": {"packettracer": {
+        "command": str(python.resolve()),
+        "args": [str((install_root / "server.py").resolve()), "--settings", str((install_root / "settings.json").resolve())],
+    }}}
+    destination = install_root / "mcp-config.json"
+    atomic_write(destination, (json.dumps(fragment, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+    return destination
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Install the local Packet Tracer MCP connector for Mistral Vibe.")
+    parser = argparse.ArgumentParser(description="Install the local Packet Tracer MCP connector for any compatible MCP client.")
     parser.add_argument("--archive", type=Path, help="Offline Windows pktctl archive (SHA-256 verified).")
-    parser.add_argument("--skip-vibe", action="store_true", help="Install without changing Vibe's config.toml.")
+    parser.add_argument("--install-dir", type=Path, help="Installation folder (default: %%LOCALAPPDATA%%/PacketTracerMCP).")
     parser.add_argument("--packet-tracer-home", help="Cisco Packet Tracer folder containing bin/meta.exe.")
     args = parser.parse_args()
     if os.name != "nt":
@@ -217,38 +198,42 @@ def main() -> int:
     for filename in ("server.py", "coursework.py", "windows_ui.py", "SKILL.md", "README.md", "THIRD_PARTY.md", "requirements.txt"):
         if not (SOURCE / filename).is_file():
             raise RuntimeError(f"Missing source file: {filename}")
-    initial_config_hash = fingerprint(CONFIG)
+    install_root = args.install_dir.expanduser().resolve() if args.install_dir is not None else default_install_root()
     uv = find_command("uv")
-    EXTENSION.mkdir(parents=True, exist_ok=True)
-    settings_path = EXTENSION / "settings.json"
+    install_root.mkdir(parents=True, exist_ok=True)
+    settings_path = install_root / "settings.json"
     old_bytes = settings_path.read_bytes() if settings_path.is_file() else None
     settings = json.loads(old_bytes.decode("utf-8-sig")) if old_bytes is not None else {
-        "app_id": "local.vibe.packettracer.tp", "secret": secrets.token_hex(32),
+        "app_id": "local.packettracer.mcp", "secret": secrets.token_hex(32),
         "address": "127.0.0.1:39000", "downloads": str(HOME / "Downloads"),
         "workspace": str(HOME / "Documents" / "PacketTracer-TP"),
     }
-    settings["packet_tracer_home"] = str(discover_packet_tracer(args.packet_tracer_home, settings))
-    python = EXTENSION / ".venv" / "Scripts" / "python.exe"
+    packet_tracer_home = discover_packet_tracer(args.packet_tracer_home, settings)
+    if args.packet_tracer_home is not None or not settings.get("packet_tracer_home"):
+        settings["packet_tracer_home"] = str(packet_tracer_home)
+    python = install_root / ".venv" / "Scripts" / "python.exe"
     if not python.is_file():
-        run([str(uv), "venv", "--python", "3.12", str(EXTENSION / ".venv")])
+        run([str(uv), "venv", "--python", "3.12", str(install_root / ".venv")])
     run([str(uv), "pip", "install", "--python", str(python), "--requirements", str(SOURCE / "requirements.txt")])
     for filename in ("server.py", "coursework.py", "windows_ui.py", "SKILL.md", "README.md", "THIRD_PARTY.md", "requirements.txt", "install.py", "install.ps1"):
         if (SOURCE / filename).is_file():
-            atomic_write(EXTENSION / filename, (SOURCE / filename).read_bytes())
-    atomic_write(SKILL, (SOURCE / "SKILL.md").read_bytes())
+            atomic_write(install_root / filename, (SOURCE / filename).read_bytes())
+    skill = install_root / "skills" / "packettracer-tp" / "SKILL.md"
+    atomic_write(skill, (SOURCE / "SKILL.md").read_bytes())
     with tempfile.TemporaryDirectory(prefix="packettracer-install-") as folder:
         archive = args.archive.resolve() if args.archive else Path(folder) / ARCHIVE_NAME
         if args.archive is None:
             request = urllib.request.Request(ARCHIVE_URL, headers={"User-Agent": "PacketTracer-MCP-Installer/1.0"})
             with urllib.request.urlopen(request, timeout=60) as response, archive.open("wb") as output:
                 shutil.copyfileobj(response, output)
-        install_vendor(archive)
+        install_vendor(archive, install_root)
     save_settings(settings_path, old_bytes, settings)
-    pta = compile_registration(settings)
-    vibe_state = "skipped" if args.skip_vibe else register_vibe(python, initial_config_hash)
-    print(json.dumps({"installed": str(EXTENSION), "engine": f"pktctl {VERSION}", "vibe": vibe_state,
+    pta = compile_registration(settings, install_root)
+    config = write_mcp_config(python, install_root)
+    print(json.dumps({"installed": str(install_root), "engine": f"pktctl {VERSION}",
+                      "mcp_config": str(config), "skill": str(skill),
                       "registration": str(pta), "workspace": settings["workspace"],
-                      "next": "If needed, add the .pta file in Extensions > IPC > Configure Apps, exit Packet Tracer normally once, and open a new Vibe session."}, ensure_ascii=False, indent=2))
+                      "next": "Import the MCP configuration fragment into your client. If needed, add the .pta file in Extensions > IPC > Configure Apps and exit Packet Tracer normally once."}, ensure_ascii=False, indent=2))
     return 0
 
 

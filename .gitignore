@@ -1,4 +1,5 @@
 settings.json
+mcp-config.json
 *.pta
 *.ptconf
 .env

@@ -14,11 +14,14 @@ from mcp.client.stdio import stdio_client
 
 async def main(args):
     report = {"started_at":datetime.now(timezone.utc).isoformat(), "checks":[]}
-    home = Path(args.home)
-    settings = json.loads((home / "settings.json").read_text(encoding="utf-8"))
+    home = Path(args.home).resolve()
+    settings = json.loads((home / "settings.json").read_text(encoding="utf-8-sig"))
     workspace = Path(settings["workspace"]) / "validation-connecteur"
     workspace.mkdir(parents=True, exist_ok=True)
-    parameters = StdioServerParameters(command=sys.executable, args=[str(home / "server.py")])
+    parameters = StdioServerParameters(
+        command=sys.executable,
+        args=[str(home / "server.py"), "--settings", str(home / "settings.json")],
+    )
     async with stdio_client(parameters) as (reader, writer):
         async with ClientSession(reader, writer) as client:
             await client.initialize()

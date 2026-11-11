@@ -5,7 +5,9 @@ description: Complete and verify Cisco Packet Tracer network labs using the pack
 
 # Packet Tracer lab workflow
 
-Use the `packettracer` MCP server for local Cisco Packet Tracer labs. Vibe uses the `packettracer_` prefix; `/mcp packettracer` lists the tools. The server exposes 72 native tools, seven course helpers and eight Windows controls.
+Use the `packettracer` MCP server for local Cisco Packet Tracer labs. It exposes 87 tools: 72 native tools, seven course helpers and eight Windows controls. Names in this workflow are the server's tool names; discover tools through the connected MCP client and use its displayed names, including any client-specific namespace.
+
+This workflow is optional for clients that load `SKILL.md`. The server also supplies workflow instructions during MCP initialization; a skill loader is not required. The supported runtime is Windows x64 with Cisco Packet Tracer 9.0.1.
 
 ## Establish the assignment and working copy
 

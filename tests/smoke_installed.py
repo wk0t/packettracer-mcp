@@ -2,6 +2,7 @@
 import argparse
 import asyncio
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -12,7 +13,11 @@ from mcp.client.stdio import stdio_client
 async def main(args):
     home = Path(args.home).resolve()
     results = {}
-    async with stdio_client(StdioServerParameters(command=sys.executable,args=[str(home/"server.py")])) as (read,write):
+    parameters = StdioServerParameters(
+        command=sys.executable,
+        args=[str(home / "server.py"), "--settings", str(home / "settings.json")],
+    )
+    async with stdio_client(parameters) as (read,write):
         async with ClientSession(read,write) as client:
             await client.initialize()
             definitions = (await client.list_tools()).tools
@@ -33,9 +38,6 @@ async def main(args):
             blocked = await client.call_tool("ui_click",{"window_id":-1,"x":0,"y":0})
             assert blocked.isError
             results["invalid_window_rejected"] = True
-            if args.regenerate_registration:
-                results["registration"] = await call("setup_exapp",{})
-                assert Path(results["registration"]["pta"]).is_file()
             results["final_status"] = await call("status",{})
             assert results["final_status"]["connected"] is True
     output = Path(__file__).resolve().parents[1]/"validation-installation.json"
@@ -45,6 +47,6 @@ async def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--home",default=str(Path.home()/".vibe/extensions/packettracer-mcp"))
-    parser.add_argument("--regenerate-registration",action="store_true")
+    local_data = Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData" / "Local")
+    parser.add_argument("--home", default=str(local_data / "PacketTracerMCP"))
     asyncio.run(main(parser.parse_args()))
