@@ -1,59 +1,61 @@
 # Configuration and troubleshooting
 
-The default installation is `%LOCALAPPDATA%\PacketTracerMCP`, with `%USERPROFILE%\AppData\Local\PacketTracerMCP` as the fallback when `LOCALAPPDATA` is unset. Use `install.ps1 -InstallDir 'D:\Tools\PacketTracerMCP'` to choose another directory. It contains the gateway, helpers, `vendor/` engine, isolated `.venv/`, generated `registration/packettracer-mcp.pta`, `settings.json`, `mcp-config.json`, and the optional `skills/packettracer-tp/SKILL.md`.
+For installation, Cisco registration and the MCP connection fragment, see [installation](installation.md). Use the [installed connector check](validation.md#check-an-installed-connector) to distinguish installation problems from an unavailable simulator.
 
-## Connect a local stdio MCP client
+## Runtime settings
 
-Any MCP client that can launch a local stdio server can use this gateway. The installer writes `mcp-config.json` as a connection fragment and does not modify any client's settings. Manually merge the `packettracer` entry into your client's MCP configuration, preserving other servers. Adapt the fragment to the client's schema when it does not use an `mcpServers` JSON object. Use absolute paths; environment-variable expansion in client configuration is not universal.
+The installer writes `settings.json` in the installation directory. It preserves existing IPC credentials on reinstallation.
 
-The generated command uses the installation's `.venv\Scripts\python.exe`, the absolute `server.py` path, and `--settings` with the absolute `settings.json` path. For a direct launch from a source checkout or an environment with the requirements installed:
+| Setting | Purpose |
+| --- | --- |
+| `app_id` | Reverse-domain identifier registered with Cisco. |
+| `secret` | Locally generated IPC credential. Keep it outside repositories and reports. |
+| `address` | Local Cisco endpoint; default `127.0.0.1:39000`. |
+| `downloads` | Permitted source directory for course files; default `%USERPROFILE%\Downloads`. |
+| `workspace` | Root for working copies, backups and reports; default `%USERPROFILE%\Documents\PacketTracer-TP`. It must not overlap `downloads`. |
+| `packet_tracer_home` | Cisco directory containing `bin\PacketTracer.exe` and `bin\meta.exe`. |
+
+Settings are selected in this order:
+
+1. `--settings <path>`.
+2. `PACKETTRACER_MCP_SETTINGS`.
+3. `settings.json` beside `server.py`.
+4. `settings.json` in the default installation directory.
+
+The generated client fragment always supplies an explicit settings path. After changing settings, restart the MCP connection. Changes to `app_id` or `secret` also require regenerating and registering the matching `.pta`; changes to `address` must match Cisco's IPC listener.
+
+The installer discovers Cisco from an existing setting or Program Files. Use `-PacketTracerHome` to choose another installation. For a source checkout with dependencies already installed, the equivalent server command is:
 
 ```powershell
 python .\server.py --settings 'D:\Tools\PacketTracerMCP\settings.json'
 ```
 
-If the native engine is stored separately, add `--runtime-dir <directory>` to select its runtime directory.
+Add `--runtime-dir <directory>` when the native engine is stored separately. The process uses stdin and stdout for MCP messages and should be launched by a local stdio MCP client.
 
-The server uses stdin and stdout for MCP messages. Launch it through your MCP client for tool use; a shell launch alone is not an interactive command interface. Remote HTTP-only clients need a separate local stdio bridge, which is not provided.
+## Files and backups
 
-The MCP initialization response provides workflow instructions. A `SKILL.md` loader is optional; if your client supports one, add the installed `skills/packettracer-tp/SKILL.md` using that client's mechanism. Tool prefixes and display namespaces vary by client. This repository uses the unprefixed tool names advertised by the server.
+Keep original course documents and `.pkt`/`.pka` files in `downloads`. Use `tp_preparer` to make a working copy in `workspace`, then open its returned `working_file`. Its manifest records the source SHA-256. Wrapped `open_network` also copies originals automatically.
 
-## Runtime settings
+The gateway backs up the current network before an open/new operation clears it, and backs up an existing output before replacing it. These protections apply to course helpers and wrapped open/save operations. Advanced `call_ipc` and desktop actions must follow the same working-copy discipline.
 
-| Setting | Purpose |
+Generated credentials, registration files, personal labs and `validation*.json` reports are excluded by `.gitignore`.
+
+## Troubleshooting
+
+The MCP server can initialize while Cisco is closed or unregistered. Successful discovery confirms the client connection; `status` confirms the separate Cisco IPC connection.
+
+| Symptom | Action |
 | --- | --- |
-| `app_id` | Reverse-domain identifier registered with Cisco; preserved on reinstallation. |
-| `secret` | Locally generated random IPC credential. Keep it outside repositories and reports. |
-| `address` | Local Cisco endpoint, normally `127.0.0.1:39000`. |
-| `downloads` | Permitted source directory for course files. |
-| `workspace` | Separate root for working files, backups and reports. It must not overlap downloads. |
-| `packet_tracer_home` | Cisco directory containing `bin/PacketTracer.exe` and `bin/meta.exe`. |
-
-Settings are selected in this order: `--settings <path>`, `PACKETTRACER_MCP_SETTINGS`, `settings.json` beside the server, then `settings.json` in the default installation directory. The installer discovers Cisco from an existing setting or Program Files; `-PacketTracerHome` selects an explicit directory. Changing the identifier or secret requires regenerating and registering the matching `.pta`.
-
-```text
-MCP client
-  └─ stdio → Python gateway
-                ├─ stdio → pktctl → local Cisco IPC
-                ├─ course files → permitted roots
-                └─ Windows controls → verified Cisco windows
-```
-
-The MCP process can initialize before Cisco is ready. `status` checks the actual simulator connection.
-
-| Symptom | Check |
-| --- | --- |
-| Server missing | Check that the connection fragment was merged into the intended client's configuration, verify absolute executable and settings paths, and restart or reload the MCP connection. |
-| Tool name not found | Refresh the client's tool discovery and use its displayed namespace or prefix. |
-| Cisco unreachable | Open Cisco and verify IPC listening and the configured address. Another instance may use another port. |
-| Application identifier rejected | Register the matching `.pta`, then quit Cisco normally once. |
-| Missing privilege | Regenerate with `setup_exapp` and register the resulting file again. |
-| Gateway file access denied | Put originals under the downloads root, create a working copy, and write inside the workspace. |
-| Partial configuration | Check `completed`, `applied`, per-command results, `finished` and actual output. |
-| Ping fails after opening | Let protocols converge with `fast_forward`, then verify addressing, interface state and ping again. |
-| Activity score unavailable | Evaluation may require its author's password; do not infer a score. |
-| Desktop input rejected | Refresh windows and select the enabled modal; inspect current focus and coordinates. |
-| Black screenshot | Restore the window or use `screenshot` with `view: "logical"`. |
-| Conflicting MCP entry | Review the existing `packettracer` entry before manually merging the generated fragment; keep other servers intact. |
-
-Generated credentials, registration files, personal labs and validation reports are excluded by `.gitignore`.
+| Install prerequisite error | Run `.\install.ps1 -Check` from the source directory. Check uv and the Cisco installation path; pass `-PacketTracerHome` for a custom path. |
+| Server missing or startup fails | Run the [offline installation check](validation.md#check-an-installed-connector). Check the merged client entry, absolute paths and `--settings` argument, then reload the connection. |
+| Tool name not found | Refresh discovery and use the client's displayed name or prefix. Expect 87 tools. |
+| Cisco unreachable | Open Cisco, complete sign-in, and check IPC listening and the configured address. Another Cisco instance may use another port. |
+| Application identifier rejected | Add the matching `.pta` in Cisco, then quit Cisco normally once and reopen. |
+| Missing privilege | Regenerate with `setup_exapp`, register the resulting file again, and exit Cisco normally once. |
+| Gateway file access denied | Put originals under `downloads`, create a working copy, and write inside `workspace`. |
+| Partial configuration | Inspect `completed`, `applied`, per-command results, `finished` and actual output before continuing. |
+| Ping fails after opening | Use `fast_forward` to allow convergence, then verify addressing, interface state and ping again. |
+| Activity score unavailable | Evaluation may require the author's password; report the check as unavailable. |
+| Desktop input rejected | Refresh `ui_windows`, select the enabled modal and inspect current focus and coordinates. |
+| Black screenshot | Restore the Cisco window or use `screenshot` with `view: "logical"`. |
+| Conflicting client entry | Review the existing `packettracer` entry and manually merge the generated fragment while preserving other servers. |
