@@ -10,13 +10,13 @@ from coursework import LabFiles, plan_vlsm
 
 @pytest.fixture
 def labs(tmp_path):
-    downloads = tmp_path / "Téléchargements"
+    downloads = tmp_path / "Downloads"
     downloads.mkdir()
-    return LabFiles(downloads, tmp_path / "TP" )
+    return LabFiles(downloads, tmp_path / "labs")
 
 
 def test_working_copies_keep_original_bytes_and_have_unique_paths(labs):
-    source = labs.downloads / "SF8 - Réseau.pka"
+    source = labs.downloads / "SF8 - Network.pka"
     source.write_bytes(b"opaque-pka-file\x00\xff")
     first = labs.prepare(str(source))
     second = labs.prepare(str(source))
@@ -37,15 +37,15 @@ def test_read_cannot_leave_authorized_roots(labs, tmp_path):
 def test_sources_are_never_write_targets(labs):
     with pytest.raises(ValueError):
         labs.resolve_write(str(labs.downloads / "original.pka"))
-    assert labs.resolve_write("rendu.pka") == labs.workspace / "rendu.pka"
+    assert labs.resolve_write("submission.pka") == labs.workspace / "submission.pka"
     with pytest.raises(ValueError):
         labs.resolve_write("../escape.txt")
 
 
 def test_docx_includes_table_addresses_and_paginated_text(labs):
-    path = labs.downloads / "consignes.docx"
+    path = labs.downloads / "instructions.docx"
     doc = Document()
-    doc.add_paragraph("Configurer selon le tableau.")
+    doc.add_paragraph("Configure according to the table.")
     table = doc.add_table(rows=1, cols=2)
     table.cell(0, 0).text = "R1"
     table.cell(0, 1).text = "192.168.10.1/24"
@@ -67,8 +67,8 @@ def test_binary_activity_is_not_treated_as_course_text(labs):
 def test_vlsm_allocates_large_lan_first_without_overlap():
     result = plan_vlsm("192.168.40.0/24", [
         {"name": "WAN", "hosts": 2},
-        {"name": "Élèves", "hosts": 60},
-        {"name": "Professeurs", "hosts": 25},
+        {"name": "Students", "hosts": 60},
+        {"name": "Teachers", "hosts": 25},
     ])
     assert [row["network"] for row in result["subnets"]] == [
         "192.168.40.0/26", "192.168.40.64/27", "192.168.40.96/30",
@@ -118,21 +118,21 @@ def test_pdf_pages_without_text_are_reported(labs):
 
 
 def test_list_matches_normalized_accents_and_rejects_unsupported_files(labs):
-    (labs.downloads / "Re\u0301seau-TP.PKA").write_bytes(b"pka")
+    (labs.downloads / "Zu\u0308rich-TP.PKA").write_bytes(b"pka")
     (labs.downloads / "CV.docx").write_bytes(b"not-opened-by-listing")
-    (labs.downloads / "reseau.exe").write_bytes(b"exe")
-    result = labs.list_labs("réseau")
+    (labs.downloads / "network.exe").write_bytes(b"exe")
+    result = labs.list_labs("zürich")
     assert result["total"] == 1
     assert result["files"][0]["kind"] == "pka"
 
 
 def test_reports_stay_in_workspace_and_do_not_overwrite_by_default(labs):
-    first = labs.save_report("TP1/rapport.md", "# Vérifications\nPing réussi")
-    assert Path(first["path"]).read_text(encoding="utf-8") == "# Vérifications\nPing réussi"
+    first = labs.save_report("Lab1/report.md", "# Checks\nPing succeeded")
+    assert Path(first["path"]).read_text(encoding="utf-8") == "# Checks\nPing succeeded"
     with pytest.raises(FileExistsError):
-        labs.save_report("TP1/rapport.md", "replacement")
+        labs.save_report("Lab1/report.md", "replacement")
     with pytest.raises(ValueError):
-        labs.save_report(str(labs.downloads / "consigne.txt"), "replacement")
+        labs.save_report(str(labs.downloads / "instructions.txt"), "replacement")
 
 
 def test_invalid_pagination_is_rejected_before_reading(labs):
