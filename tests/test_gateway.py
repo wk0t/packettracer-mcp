@@ -65,8 +65,8 @@ class MemoryEngine:
 
 @pytest.fixture
 def make_gateway(tmp_path):
-    downloads = tmp_path / "Téléchargements"
-    workspace = tmp_path / "TP"
+    downloads = tmp_path / "Downloads"
+    workspace = tmp_path / "labs"
     downloads.mkdir()
     workspace.mkdir()
 
@@ -129,12 +129,12 @@ def test_save_cannot_overwrite_downloaded_source(make_gateway, explicit):
 
 def test_save_keeps_existing_working_file_as_backup_before_replacing(make_gateway):
     gateway, engine = make_gateway(content=b"new student configuration")
-    target = gateway.files.workspace / "rendu.pka"
+    target = gateway.files.workspace / "submission.pka"
     target.write_bytes(b"previous saved configuration")
     reply = asyncio.run(gateway.call("save_network", {"path": str(target)}))
     assert not reply.isError
     assert target.read_bytes() == b"new student configuration"
-    backups = list((gateway.files.workspace / "sauvegardes").glob("*.pka"))
+    backups = list((gateway.files.workspace / "backups").glob("*.pka"))
     assert len(backups) == 1
     assert backups[0].read_bytes() == b"previous saved configuration"
 

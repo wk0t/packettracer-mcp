@@ -107,8 +107,8 @@ class Gateway:
             {"method":"getActiveFile"}, {"method":"getSavedFilename"}]})
         return result.get("value") or ""
 
-    def fresh_path(self, stem="sauvegarde", suffix=".pkt"):
-        target = self.files.resolve_write(f"sauvegardes/{stem}-{datetime.now():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}{suffix}")
+    def fresh_path(self, stem="backup", suffix=".pkt"):
+        target = self.files.resolve_write(f"backups/{stem}-{datetime.now():%Y%m%d-%H%M%S}-{uuid.uuid4().hex[:8]}{suffix}")
         target.parent.mkdir(parents=True, exist_ok=True)
         return str(target)
 

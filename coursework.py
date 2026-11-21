@@ -68,7 +68,7 @@ class LabFiles:
         if source.suffix.lower() not in ACTIVITY_EXTENSIONS:
             raise ValueError("Choose a Packet Tracer .pkt or .pka file.")
         self.workspace.mkdir(parents=True, exist_ok=True)
-        slug = re.sub(r"[^\w .-]", "_", source.stem, flags=re.UNICODE)[:30].strip(" .") or "activite"
+        slug = re.sub(r"[^\w .-]", "_", source.stem, flags=re.UNICODE)[:30].strip(" .") or "activity"
         prefix = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-") + slug + "-"
         folder = Path(tempfile.mkdtemp(prefix=prefix, dir=self.workspace))
         working = self.resolve_write(str(folder / source.name))
